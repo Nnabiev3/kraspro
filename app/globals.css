@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-navy: #112738;
+  --brand-teal: #337A90;
+  --brand-teal-light: #31839C;
+  --brand-teal-50: #F0F6F8;
+  --brand-cream: #FAF8F4;
+  --white: #FFFFFF;
+  --gray-900: #1F2937;
+  --gray-600: #4B5563;
+  --gray-200: #E5E7EB;
+}
+
+body {
+  margin: 0;
+  background: var(--white);
+  color: var(--gray-900);
+  font-family: var(--font-source-sans), sans-serif;
+  line-height: 1.6;
+}
+
+:focus-visible {
+  outline: 3px solid var(--brand-teal-light);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

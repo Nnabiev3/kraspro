@@ -1,0 +1,367 @@
+# ROLE
+
+You are a senior full-stack developer and technical SEO/AEO specialist with deep experience building conversion-focused websites for local home-service contractors. You write clean, typed, well-commented, accessible code, and you never invent facts about a real business.
+
+# PROJECT OVERVIEW
+
+Build a multi-page, conversion-focused website for **KrasPro LLC**, a licensed home exterior remodeling contractor based in Reisterstown, Baltimore County, Maryland. The site's job is to turn local homeowners into free-estimate requests and phone calls. Visitors should leave trusting the company because it explains things plainly, shows evidence before pricing, and writes itemized quotes.
+
+Services (one dedicated page each):
+1. Door and Window Installation (including basement windows)
+2. Exterior Painting
+3. Decks, Siding and Fence
+4. Roofing, Gutters, Shutters, Rain Caps and Exterior Capping
+5. Historic Building Restoration
+6. Garage Additions
+
+# NON-NEGOTIABLE RULES (read first)
+
+1. **No invented facts.** Do not fabricate reviews, ratings, license numbers, insurance details, awards, years in business, project counts, lender names, interest rates, or prices. Anything unknown becomes a clearly marked placeholder in ONE file, `/data/site.ts`, using the prefix `TODO_OWNER:` (e.g. `phone: "TODO_OWNER: phone"`). Components read from that config; never hard-code business facts inside components.
+2. **No fake social proof.** `/data/reviews.ts` ships empty. The Reviews page and homepage review strip must render a tasteful "Reviews coming soon / Leave us a review" state when there are no reviews. Emit `Review` or `AggregateRating` JSON-LD only when real reviews exist in the data file.
+3. **Placeholder guard.** Add `scripts/check-placeholders.mjs` (run as `npm run check:placeholders` and wired into `prebuild` as a WARNING). It scans `/data`, `/app` and `/components` for `TODO_OWNER:` and for image entries flagged `isPlaceholder: true`, then prints a checklist of what the owner must fill in before launch.
+4. **Trust claims are config-driven.** The brief calls for "licensed, insured, no-commission sales, photo evidence before pricing, itemized quotes". Implement these as boolean flags and text fields in `/data/site.ts` (`trust.licensed`, `trust.insured`, `trust.noCommissionSales`, `trust.photoEvidence`, `trust.itemizedQuotes`) so the owner can confirm each one. Default them to true in the UI copy, and have the placeholder check list them under "OWNER MUST CONFIRM BEFORE LAUNCH".
+5. **Legal and cost statements must be conservative.** Do not state specific dollar figures. Where the seed content below mentions codes, permits or tax credits, keep the wording general ("varies by county", "confirm with...") exactly as written.
+6. **Correct the misspellings** in the original service list: "Bourns" is "Barns", "Winil" is "Vinyl", "Lid paint" is "Lead paint", "Door and Windows" is "Door and Window". Interpret "Rain Cap Installation" as chimney rain caps and "Exterior Capping" as aluminum capping (trim coil wrap) of exterior wood trim. Note both interpretations in the README under "Assumptions".
+
+# TECHNICAL STACK
+
+- **Next.js 14+ (App Router) with TypeScript**, statically generated (SSG). Every page must build as static HTML.
+- **Tailwind CSS** with design tokens defined as CSS variables, mapped in `tailwind.config.ts`.
+- Fonts via `next/font/google`: **Playfair Display** (headings) and **Source Sans 3** (body; this is the current Google Fonts name for Source Sans Pro). Use `display: swap` and expose them as CSS variables.
+- Images via `next/image`. Icons via `lucide-react`.
+- Forms: a React client component with client-side validation and a Next.js Route Handler at `/app/api/quote/route.ts`. Validate with `zod`, include a honeypot field and basic rate limiting, and leave a clearly commented integration point for an email provider (Resend or SMTP) controlled by environment variables. If no env vars are set, log the submission server-side and return success. Document this in the README.
+- No heavy UI frameworks, no unnecessary dependencies.
+- Scripts: `dev`, `build`, `start`, `lint`, `typecheck`, `check:placeholders`.
+
+# BRAND ASSETS
+
+**Logos (already saved, do NOT generate or download anything)**
+- `/public/images/brand/logo-icon-transparent.svg` — Icon-only logo, transparent background, teal color. (Use this in the Header).
+- `/public/images/brand/logo-full-transparent.svg` — Full logo with text, transparent background.
+- `/public/images/brand/logo-full-dark-bg.svg` — Full logo with text on a dark background (Use ONLY for OG image/social sharing).
+
+**Header Logo Implementation (CRITICAL)**
+Do NOT use the full SVG text inside the header. Build the logo using code:
+- Left side of the header: an `<a>` tag linking to `/`, with `aria-label="KrasPro LLC Home"`.
+- Inside the `<a>`, place the transparent icon using Next.js `<Image src="/images/brand/logo-icon-transparent.svg" unoptimized width={40} height={40} />`.
+- Next to the icon, render the text `<span className="font-heading text-2xl tracking-tight text-white">KrasPro</span>`.
+- Because the header background is `#112738`, the text MUST be white, and the transparent teal icon will sit perfectly on it.
+
+**Color palette (EXACT HEX CODES FROM FIGMA - DO NOT ALTER)**
+Define these exact tokens in `globals.css` as CSS variables and map them in `tailwind.config.ts`:
+
+- `--brand-navy: #112738`   → primary dark (header background, footer background, headings, dark sections)
+- `--brand-teal: #337A90`   → primary brand color (icons, primary CTA buttons background, links)
+- `--brand-teal-light: #31839C` → hover states for buttons, active links, lighter accents
+- `--brand-teal-50: #F0F6F8` → very light tint of teal for alternate section backgrounds (if needed)
+- `--brand-cream: #FAF8F4`  → alternate section background
+- `--white: #FFFFFF`
+- Neutrals: `--gray-900: #1F2937`, `--gray-600: #4B5563`, `--gray-200: #E5E7EB`
+
+**Favicon & App Icons**
+- The favicon files have already been generated and placed in the project.
+- `favicon.ico` is located in `/app/favicon.ico` (Next.js App Router will handle it automatically).
+- `apple-touch-icon.png` and other web app manifest files are in `/public/`.
+- Do NOT generate placeholder favicons or add custom favicon links in the `metadata` object in `layout.tsx` unless necessary. 
+Rely on Next.js App Router's default favicon behavior.
+
+Rules:
+- Do NOT introduce any color outside this palette (except neutral grays and white).
+- Primary CTA buttons: background `--brand-teal` (#337A90) with `#FFFFFF` text. Hover state uses `--brand-teal-light` (#31839C).
+- The dark header and footer MUST use `--brand-navy` (#112738).erify and fix any failures.
+
+# FILE STRUCTURE
+
+Create this structure (adapt only if there is a strong technical reason, and explain why in the README):
+
+/app
+  layout.tsx                         (fonts, global metadata, Header, Footer, LocalBusiness JSON-LD, skip link)
+  page.tsx                           (Homepage)
+  not-found.tsx
+  sitemap.ts
+  robots.ts
+  /services
+    page.tsx                         (services index)
+    /[slug]/page.tsx                 (dynamic ServicePage, generateStaticParams from services data)
+  /about/page.tsx
+  /financing/page.tsx
+  /contact/page.tsx
+  /reviews/page.tsx
+  /privacy/page.tsx                  (simple privacy policy stub, flagged for owner review)
+  /api/quote/route.ts
+/components
+  /layout    Header.tsx, MobileNav.tsx, ServicesDropdown.tsx, Footer.tsx, StickyMobileCTA.tsx, SkipLink.tsx
+  /sections  Hero.tsx, TrustBar.tsx, ServiceGrid.tsx, ProcessSteps.tsx, FinancingBand.tsx, ServiceAreas.tsx, ProjectGallery.tsx, ReviewsStrip.tsx, FAQAccordion.tsx, CTABand.tsx, BenefitsGrid.tsx
+  /service   ServicePageLayout.tsx, SubServiceList.tsx, RelatedServices.tsx
+  /forms     QuoteForm.tsx
+  /seo       JsonLd.tsx, LocalBusinessJsonLd.tsx, FaqJsonLd.tsx, ServiceJsonLd.tsx, BreadcrumbJsonLd.tsx
+  /ui        Button.tsx, Card.tsx, Container.tsx, SectionHeading.tsx, Badge.tsx
+/data
+  site.ts          (company facts, contact, trust flags, nav, service areas; the single source of truth)
+  services.ts      (typed data for all 6 services, including FAQs)
+  home.ts          (homepage FAQ, process steps, value props)
+  projects.ts      (gallery items; placeholders flagged)
+  reviews.ts       (empty array by default)
+/lib  seo.ts (metadata helpers), schema.ts (JSON-LD builders), validators.ts
+/public/images  brand/, hero/, services/, projects/, og/
+/scripts  check-placeholders.mjs
+README.md
+
+# DATA MODEL
+
+In `/data/services.ts` define and export:
+
+type Faq = { question: string; answer: string }
+type ServiceStep = { title: string; description: string }
+type Service = {
+  slug: string; navLabel: string; h1: string; metaTitle: string; metaDescription: string
+  heroSubhead: string; intro: string[]; subServices?: { title: string; description: string }[]
+  benefits: { title: string; description: string }[]; process: ServiceStep[]
+  faqs: Faq[]; related: string[]; heroImage: { src: string; alt: string; isPlaceholder?: boolean }
+}
+
+All service pages, the navigation dropdown, the services index, the sitemap, the footer and the JSON-LD must be generated from this one array.
+
+# GLOBAL COMPONENTS
+
+**Header (sticky)**
+- **Background:** `--brand-navy` (#112738). Text, icons, and nav links must be `#FFFFFF`.
+- **Logo:** Implement using the code approach described in BRAND ASSETS (transparent teal icon + white "KrasPro" text using the `font-heading` class).
+- **Navigation:** Center links (Home, Services dropdown, About, Financing, Reviews, Contact). White text, hover state uses `--brand-teal-light` (#31839C).
+- **Right side:** Prominent phone number (white text, click-to-call) and a "Get a Free Quote" button using `--brand-teal` (#337A90) background with white text. Hover state uses `--brand-teal-light` (#31839C).
+- **Dropdown (Services):** The dropdown menu itself should have a white background (for readability), but the main header bar stays dark (#112738).
+- **On Scroll:** The header should remain dark. Add a subtle `box-shadow` and slightly reduce padding (shrinks height) to indicate scroll state.
+- **Mobile:** Full-screen dark overlay menu (`--brand-navy` #112738) with white text and a teal CTA button.
+
+**StickyMobileCTA**: a bottom bar on mobile with "Call" and "Free Quote" buttons.
+
+**Footer**
+- Column 1: logo and a one-line company description. Column 2: all 6 service links. Column 3: company pages (About, Financing, Reviews, Contact, Privacy).
+- Column 4: contact (phone, email, address, hours from config). Below: Maryland home improvement license line (`MHIC #` from config, and the EPA Lead-Safe certification line only if provided in config), a service-areas list, and © year (computed).
+
+# PAGE REQUIREMENTS
+
+## Homepage (`/`)
+
+Follow the proven structure of https://bravoroofingmd.com/ (study it if you have network access):
+
+1. **Hero**: strong trust hook. H1: "Honest Exterior Work for Maryland Homes." Subhead: "We show you what's wrong, in photos, before we ever talk price. Itemized quotes. No commission sales." Primary CTA: "Get a Free Quote". Secondary CTA: call button. Below the CTAs, 3-4 trust chips driven by config flags (Licensed in Maryland, Insured, Itemized Quotes, No-Commission Sales).
+2. **TrustBar**: license number, insurance, and a review summary slot. Show review stats only if `reviews.ts` has real data; otherwise show the license and process promises.
+3. **Value proposition**: three or four cards: "Photo Evidence First", "Itemized, Written Quotes", "No Commission, No Pressure", "Clean Job Sites". Keep each claim config-flagged.
+4. **Services overview**: ServiceGrid with 6 cards (image, title, 1-line summary, "Learn more" link).
+5. **Process**: 4 steps: 1) Tell us about your project, 2) We inspect and document with photos, 3) You get an itemized written quote, 4) We do the work and clean up.
+6. **Financing**: FinancingBand with a short teaser and a link to `/financing`. Use generic wording only (no lender names or rates).
+7. **Service areas**: list of counties and towns from config, with a simple styled list or map graphic (no heavy map embeds). Default list (owner to confirm): Baltimore County (Reisterstown, Owings Mills, Pikesville, Towson, Randallstown, Cockeysville, Catonsville), Baltimore City, Carroll County, Howard County, Harford County.
+8. **Recent projects gallery**: from `projects.ts` (6 items, responsive grid, lightbox optional). Ship with placeholder entries flagged `isPlaceholder`.
+9. **Reviews strip**: real reviews only, otherwise a "Be our next review" prompt.
+10. **FAQ**: 6 general Q&As (below) with the accordion plus FAQPage JSON-LD.
+11. **Final CTA band** with the quote form teaser, phone and email.
+
+Homepage FAQ seed (answers must respect the config flags):
+- Are you licensed and insured in Maryland?
+- Do your salespeople work on commission?
+- How does your quote process work?
+- Which areas do you serve?
+- Do you offer financing?
+- How soon can you start my project?
+
+## Services index (`/services`)
+Intro paragraph, the 6-card grid, a "Not sure what you need?" CTA band, and breadcrumb JSON-LD.
+
+## Service pages (`/services/[slug]`), 6 total
+
+Every page uses a reusable `ServicePageLayout` with these blocks, in order: **Hero** (H1, subhead, CTA, trust chips, image) → **Service description** (2 unique intro paragraphs of about 120-200 words each, plus the sub-services list where provided) → **Benefits** (4-6 cards) → **Process** (3-4 steps) → **Q&A** (accordion, 4+ pairs, with FAQPage JSON-LD) → **Related services** → **CTA band with QuoteForm**. Also include a breadcrumb, `Service` JSON-LD, and unique metadata.
+
+Write original, specific copy for each page. Do not copy-paste boilerplate between pages. Use the seeds below.
+
+### 1. Door and Window Installation
+- slug `door-and-window-installation`
+- H1: "Door and Window Installation in Maryland"
+- Meta title: "Window & Door Installation in Maryland | KrasPro LLC"
+- Meta description: "Licensed Maryland contractor for window, door and basement window installation. Photo-backed assessments and itemized quotes. Get a free estimate."
+- Subhead seed: "Replacement windows, entry doors, patio doors and basement windows, installed square, sealed and finished cleanly."
+- Sub-services: Replacement windows; Entry and storm doors; Patio and sliding doors; **Basement window installation** (replacement in existing openings, new openings, egress windows and wells, glass block).
+- Benefits seeds: better comfort and lower drafts; improved security and curb appeal; proper flashing and sealing to prevent water intrusion; safe egress for finished basements; clean installation with trim and caulk finished.
+- Process: 1) Measure and assess openings, 2) Choose products and see the itemized quote, 3) Remove, install, flash and seal, 4) Trim, caulk, clean up and final walkthrough.
+- Q&A:
+  1. Q: How much does basement window installation cost in Maryland? A: The cost depends on the window size and type, and mainly on whether we are replacing a window in an existing opening or cutting a new one. Egress windows with a window well involve excavation and cost more than a like-for-like replacement. After we see photos or visit your home, you get a written, itemized quote with no surprises.
+  2. Q: Do I need an egress window in my basement? A: If you are finishing a basement as a bedroom or other habitable space, building codes generally require an emergency escape opening of a minimum size. Requirements and permits vary by county, so we confirm them with your local permitting office before cutting anything.
+  3. Q: How long does it take to replace windows in a typical house? A: Replacing a single window or door is often done in a few hours. A whole-house window replacement is commonly completed in a few days, depending on the number of windows and any repairs the openings need. We give you a realistic schedule in your quote.
+  4. Q: Should I repair or replace my windows and exterior doors? A: If the frames are sound, repair or reglazing can be the more cost-effective choice. Replacement makes sense when frames are rotted, seals have failed (fogging between panes), or drafts and water leaks continue after repair. We tell you which option fits and do not push replacement when repair will do.
+
+### 2. Exterior Painting
+- slug `exterior-painting`
+- H1: "Exterior Painting in Maryland"
+- Meta title: "Exterior Painting in Maryland | KrasPro LLC"
+- Meta description: "Exterior house, barn, vinyl siding and metal roof painting in Maryland. Lead-safe prep, power washing, stripping and window reglazing. Free estimates."
+- Sub-services (cards): Houses; Barns; Metal roofs and chimneys; Vinyl siding painting; Power wash and prep painting; Stripping all paints; Window reglazing; Lead paint removal.
+- Benefits seeds: prep-first approach so paint lasts; protection from Maryland humidity and freeze-thaw cycles; stronger curb appeal and home value; lead-safe practices on older homes; tidy, protected job site.
+- Process: 1) Inspect and document surfaces, 2) Wash, scrape, strip and repair, 3) Prime and caulk, 4) Apply finish coats and complete a walkthrough.
+- Q&A:
+  1. Q: How often should I repaint the exterior of my house in Maryland? A: Well-prepared exterior paint on siding commonly lasts roughly 7 to 10 years, and sun-exposed walls and trim may need attention sooner. Maryland's humid summers and freeze-thaw winters are hard on coatings, and surface prep matters more than paint brand.
+  2. Q: Do you have to remove the old paint before repainting? A: Not always. Sound paint can usually be scraped, sanded, primed and painted over. If paint is peeling, blistering or built up in failing layers, it should be stripped back to a sound surface first, otherwise the new coat will fail too.
+  3. Q: Is lead paint a concern for older Maryland homes? A: Homes built before 1978 may contain lead-based paint. Under the EPA's Renovation, Repair and Painting (RRP) rule, contractors who disturb paint in these homes must be EPA Lead-Safe Certified and follow lead-safe work practices, and Maryland has additional rules for pre-1978 rental properties. Ask any contractor for their certification before work begins.
+  4. Q: Can vinyl siding be painted? A: Yes, with proper cleaning and the right product. Use paint formulated for vinyl and a color close in lightness to the original, because dark colors can absorb heat and warp vinyl.
+  5. Q: Can you paint barns, metal roofs and chimneys? A: Yes. Metal surfaces need thorough cleaning, rust treatment and a metal-appropriate primer before finish coats. Barns usually need extra washing and scraping on rough-sawn wood. We assess the condition first and tell you what prep it needs.
+
+### 3. Decks, Siding and Fence
+- slug `decks-siding-fence`
+- H1: "Decks, Siding and Fence Installation in Maryland"
+- Meta title: "Decks, Siding & Fence Installation MD | KrasPro LLC"
+- Meta description: "Custom decks, siding replacement and fence installation in Maryland. Quality materials, permit guidance and itemized quotes. Request a free estimate."
+- Sub-services: Pressure-treated and composite decks; Deck repair and refinishing; Vinyl, fiber cement and engineered wood siding; Siding repair; Wood, vinyl and aluminum fence.
+- Benefits seeds: stronger, safer outdoor living space; weather protection and lower maintenance; improved curb appeal; permit and HOA guidance; material options explained honestly.
+- Process: 1) Site visit and measurements, 2) Material selection and itemized quote, 3) Permits, layout and construction, 4) Final inspection, cleanup and walkthrough.
+- Q&A:
+  1. Q: Do I need a permit to build a deck or fence in Maryland? A: Most new decks require a building permit, and many fences do depending on height and location. Rules are set by your county or city, and your HOA may have its own approval process. We check the requirements before work begins.
+  2. Q: What is the best siding for Maryland weather? A: Common choices are vinyl (low maintenance and budget-friendly), fiber cement (very durable and paintable) and engineered wood. The best option depends on your budget, the look you want and any HOA or historic requirements, and we explain the trade-offs plainly.
+  3. Q: How long does a deck last? A: Pressure-treated wood decks commonly last 10 to 20 years with regular cleaning and sealing. Composite decking often carries warranties of 25 years or more, depending on the manufacturer.
+  4. Q: Can you replace siding on just part of my house? A: Yes, partial repairs are possible, but matching older profiles, colors and weathering can be difficult. We tell you whether a patch will blend in or whether replacing a full wall gives a better result.
+
+### 4. Roofing, Gutters, Shutters, Rain Caps and Exterior Capping
+- slug `roofing-gutters-shutters`
+- H1: "Roofing, Gutters, Shutters and Exterior Capping in Maryland"
+- Meta title: "Roofing, Gutters & Exterior Trim in MD | KrasPro LLC"
+- Meta description: "Roof repair and replacement, seamless gutters, shutters, chimney rain caps and aluminum capping in Maryland. Photo-backed, itemized quotes."
+- Sub-services: Roof repair and replacement; Seamless gutters and downspouts; Shutters; Chimney rain cap installation; Exterior (aluminum) capping of fascia, trim and soffit.
+- Benefits seeds: keeps water out and protects the structure; photo-documented problem areas before pricing; proper ventilation and flashing details; reduced repainting with capping; one crew for the whole roofline.
+- Process: 1) Roof and roofline inspection with photos, 2) Repair-versus-replace recommendation and itemized quote, 3) Installation with flashing, ventilation and protection of landscaping, 4) Magnet sweep, cleanup and final walkthrough.
+- Q&A:
+  1. Q: How do I know if I need a roof repair or a full replacement? A: Widespread granule loss, curling or missing shingles, multiple leaks, or a roof near the end of its service life point toward replacement. Isolated damage can usually be repaired. We photograph the problem areas and show you before we quote.
+  2. Q: Are seamless gutters worth it, and what size do I need? A: Seamless gutters are formed to length on site, so there are fewer joints that can leak. Most homes use 5-inch gutters, while large roofs or heavy runoff may call for 6-inch. We size them to your roof and downspout layout.
+  3. Q: What is a chimney rain cap and do I need one? A: A rain cap covers the top of the flue to keep rain, animals and debris out. It helps protect the flue liner and prevents water damage inside the chimney, so most chimneys should have one.
+  4. Q: What is exterior capping and is it worth it? A: Capping wraps wood trim such as fascia and window trim in aluminum so it no longer needs repainting and is better protected from moisture. It works best over sound wood, so rotted areas are repaired first.
+
+### 5. Historic Building Restoration
+- slug `historic-building-restoration`
+- H1: "Historic Building Restoration in Maryland"
+- Meta title: "Historic Home Restoration in Maryland | KrasPro LLC"
+- Meta description: "Careful restoration of historic homes and buildings in Maryland: wood windows, siding, trim and masonry matched to the original. Free consultation."
+- Sub-services: Historic wood window repair and reglazing; Siding and trim matching; Masonry and mortar repair; Porches and architectural details; Historic paint color and finish work.
+- Benefits seeds: preserves original character and value; repair-first approach that reviewers prefer; matched materials and compatible methods; help with documentation for local review; careful, protective work practices.
+- Process: 1) Document the building's existing condition and details, 2) Plan repairs and prepare documentation for any required review, 3) Restore using matched or salvaged materials and compatible methods, 4) Final inspection and care guidance.
+- Q&A:
+  1. Q: Do I need approval to restore or alter a historic home in Maryland? A: If your property is in a local historic district or is a designated landmark, exterior changes usually need review and approval before work starts. This is handled by the local historic preservation commission. We help you gather photos, drawings and material details for your application.
+  2. Q: Are there tax credits for historic restoration in Maryland? A: Maryland offers a state heritage structure rehabilitation tax credit for qualified work on eligible historic properties, and federal credits exist for certain income-producing historic buildings. Eligibility and pre-approval steps apply, so confirm with the Maryland Historical Trust before work begins.
+  3. Q: Can original wood windows be repaired instead of replaced? A: Often yes. Repairing, reglazing and weatherstripping original windows preserves their character and can improve performance. Replacement is reserved for sash or frames that are beyond repair, and historic review boards frequently prefer repair.
+  4. Q: How do you match original materials like siding, trim and brick mortar? A: We document the existing profiles, wood species, finishes and mortar, then source or mill matching material or use salvaged pieces. For old brick we use compatible mortar rather than a harder modern mix that can damage the brick.
+
+### 6. Garage Additions
+- slug `garage-additions`
+- H1: "Garage Additions in Maryland"
+- Meta title: "Garage Additions in Maryland | KrasPro LLC"
+- Meta description: "Attached and detached garage additions in Maryland, from permits and foundation to roofing and finish. Itemized quotes and clear timelines."
+- Sub-services: Attached garages; Detached garages; One-car and two-car layouts; Garage conversions and storage; Doors, openers, electrical and siding to match the home.
+- Benefits seeds: added storage and vehicle protection; added home value; design and materials matched to the existing house; permit paperwork support; one contractor from foundation to finish.
+- Process: 1) Site visit, goals and rough layout, 2) Plans, permits and an itemized quote, 3) Foundation, framing, roofing, electrical and exterior finish, 4) Final inspection, cleanup and walkthrough.
+- Q&A:
+  1. Q: How much does it cost to add a garage in Maryland? A: Cost depends on the size, whether it is attached or detached, the foundation type, electrical needs, exterior finishes and site conditions. After a site visit, you receive a written, itemized quote that shows what each part of the project costs.
+  2. Q: Do I need a permit for a garage addition? A: Yes. Garage additions require a building permit and zoning review for setbacks and lot coverage, and often a site plan or survey. If you have an HOA, it may need to approve the design as well. We help coordinate the paperwork.
+  3. Q: Should I build an attached or detached garage? A: Attached garages are convenient in bad weather and can sometimes support living space above. Detached garages offer more placement flexibility and are well suited to workshops. Lot layout and local setback rules often decide which works.
+  4. Q: How long does a garage addition take to build? A: After permits are approved, construction typically takes several weeks to a few months depending on size, complexity and weather. Permit review time varies by jurisdiction. We put a realistic schedule in your quote.
+
+## Other pages
+
+**About (`/about`)**: company story (use only config-provided facts; where the owner's story is unknown, create a short, honest, clearly-marked placeholder section), what we stand for (honest assessments, photo evidence, itemized quotes, no-commission sales, clean job sites), credentials block (MHIC license, insurance, EPA Lead-Safe certification if provided, from config), service areas, and a CTA.
+
+**Financing (`/financing`)**: explain generically how financing can work for larger exterior projects, a "what to expect" 3-step flow, an FAQ (3-4 questions with general answers), and a CTA. Do not name lenders or quote rates, terms or approval claims. Add `TODO_OWNER: confirm financing partner, terms and disclosures` to the placeholder check. Include a small "Financing availability is subject to credit approval" disclaimer.
+
+**Contact (`/contact`)**: the full QuoteForm (name, phone, email, ZIP, service dropdown, project description, optional photo upload, preferred contact method, consent checkbox), click-to-call phone, email, address, hours, a service-area note, and what happens after you submit (response time from config). Include `ContactPage` and LocalBusiness JSON-LD.
+
+**Reviews (`/reviews`)**: render real reviews from `reviews.ts` (name, date, service, rating, text) with filtering by service. When the array is empty, show the "coming soon" state with a call to action to leave a review. Never fabricate content.
+
+# STYLING INSTRUCTIONS
+
+Use the "Find Your Dream Home Website UI Template" (Figma) as the visual style guide: clean lines, generous white space, high-quality imagery, subtle hover effects, a sticky header and a modern, premium feel. Avoid anything muted, dull or playful; the look is sophisticated and trustworthy.
+
+- Headings: Playfair Display (weights 600-700), tight line-height, large and confident on desktop. Body: Source Sans 3 (400/600), 16-18px, line-height 1.6-1.7.
+- Layout: 1200px max container, 8px spacing scale, alternate section backgrounds (white, cream, blue-50) for rhythm, and at least 80-96px vertical padding on desktop sections.
+- Cards: white, 12-16px radius, subtle layered shadow, 1px gray-200 border, gentle lift on hover (translateY and shadow only, 150-250ms).
+- Buttons: primary = accent-700 background with white text; secondary = outlined navy; consistent min height 48px; strong visible focus ring.
+- Imagery: `next/image`, consistent aspect ratios, descriptive alt text. Where real photos do not exist yet, use neutral branded placeholder images flagged `isPlaceholder: true`.
+- Respect `prefers-reduced-motion`. Keep animations minimal and CSS-only.
+- Fully responsive: design mobile-first and check 360px, 768px, 1024px and 1440px widths.
+
+# CONTENT AND TONE GUIDELINES
+
+- Voice: direct, plain-spoken, transparent, like a contractor who tells you the truth about your home, in the spirit of Bravo Roofing's "we tell you the truth" positioning. No jargon walls, no hype, no fake urgency, no fear tactics.
+- Recurring messages (config-flagged): photo evidence before pricing, itemized written quotes, no-commission sales, licensed and insured, clean job sites.
+- Use second person ("you", "your home"). Short paragraphs. Descriptive headings that contain the service and the place where natural.
+- Use location language naturally across the site: Maryland, Baltimore County, Reisterstown, Owings Mills, Pikesville, Towson and the other configured areas. Avoid keyword stuffing and doorway-style repetition.
+- CTAs vary by context: "Get a Free Quote", "Request a Free Inspection", "Call Us".
+
+# SEO AND AEO REQUIREMENTS
+
+- Semantic HTML5: one H1 per page, logical H2/H3 hierarchy, `<header>`, `<nav>`, `<main>`, `<section>` with headings, `<footer>`, `<address>` where appropriate.
+- Per-page unique `<title>` and meta description (use the seeds above; write unique ones for the other pages), canonical URLs, Open Graph and Twitter tags, `metadataBase` from an env var `NEXT_PUBLIC_SITE_URL`. Generate a default OG image placeholder.
+- JSON-LD (rendered via a safe `JsonLd` component using `<script type="application/ld+json">`):
+  - **LocalBusiness** (use `GeneralContractor`) in the root layout: name, logo, url, telephone, address, areaServed (counties and towns from config), openingHours, and `sameAs` if provided. Omit any property whose config value is still a `TODO_OWNER:` placeholder.
+  - **FAQPage** on every service page and the homepage, built directly from the same `faqs` data that renders the accordion, so markup and visible content always match.
+  - **Service** on each service page (provider, areaServed, description).
+  - **BreadcrumbList** on all inner pages.
+- AEO: each Q&A must be a natural-language question a homeowner would ask, with a concise 2-4 sentence answer that directly answers in the first sentence. Add a short "Quick answer" summary near the top of each service page that states what the service is, where it is offered, and how to get a quote.
+- `sitemap.ts` (all routes, with lastModified) and `robots.ts`. Use internal links generously: the dropdown, related services, footer, and contextual links between service pages. Use descriptive anchor text.
+- Image alt text must be descriptive. Use clean, lowercase, hyphenated URLs.
+
+# PERFORMANCE AND ACCESSIBILITY
+
+- Target Lighthouse 95+ on Performance, Accessibility, Best Practices and SEO (mobile). Use `next/image` with correct `sizes`, priority only for the hero image, and avoid layout shift.
+- WCAG 2.1 AA: skip link, visible focus states, labeled form fields with inline error messages (`aria-describedby`), sufficient contrast, keyboard-operable dropdown and accordion (`aria-expanded`, `aria-controls`), and proper landmark roles.
+- No third-party scripts by default. Add a commented analytics placeholder in the layout.
+
+# CODE QUALITY
+
+- TypeScript strict mode, ESLint clean, no `any`. Small, reusable, single-responsibility components. Page files only compose sections and pass data.
+- Comment every component with its purpose and props, and add short comments for non-obvious logic. Keep content out of components and in `/data`.
+- Run `npm run lint`, `npm run typecheck` and `npm run build` and fix every error before finishing.
+
+# WORKFLOW AND OUTPUT FORMAT
+
+Work in this order, and create the actual files in the repository as you go:
+1. Project setup (config, Tailwind tokens, fonts, scripts) and README skeleton.
+2. `/data` files (site, services, home, projects, reviews) and `/lib`.
+3. UI primitives, layout components (Header, Footer, MobileNav, StickyMobileCTA).
+4. SEO components and helpers (JSON-LD, metadata).
+5. Section components, then `ServicePageLayout`.
+6. Pages: homepage, services index, the 6 service pages via the dynamic route, About, Financing, Contact (with API route), Reviews, Privacy, Not Found.
+7. `sitemap.ts`, `robots.ts`, placeholder check script, final README.
+
+Present your progress file by file: for each file, give a heading with its path and a one-to-two sentence explanation of its purpose, then the code. Do not skip files or leave "..." stubs.
+
+The README must include: setup and run commands, environment variables, how to add or edit a service (data only), how to add real reviews and projects, the "Assumptions" section (the interpretations of "rain cap" and "exterior capping" and the spelling corrections), and the pre-launch checklist produced by `check:placeholders`.
+
+# ACCEPTANCE CHECKLIST (verify before you finish)
+
+- All 12+ routes build statically: home, services index, 6 service pages, about, financing, contact, reviews, privacy, 404.
+- Each service page has hero, description, benefits, 3-4 step process, 4+ Q&A with matching FAQPage JSON-LD, related services and a CTA with the quote form.
+- Header has logo, services dropdown, phone and "Get a Free Quote". Footer has services, contact and license info.
+- Fonts are Playfair Display (headings) and Source Sans 3 (body); colors come from the KrasPro logo or the documented fallback palette; all contrast checks pass.
+- No fabricated reviews, ratings, license numbers, lenders, rates or prices anywhere. All unknowns are `TODO_OWNER:` placeholders surfaced by `npm run check:placeholders`.
+- Misspellings corrected (Barns, Vinyl, Lead paint, Door and Window).
+- Unique title and meta description on every page; sitemap and robots present; LocalBusiness JSON-LD in the root layout.
+- Lint, typecheck and build pass; the site is responsive and keyboard accessible.
+
+
+# EXECUTION INSTRUCTION FOR THIS PASS (PASS 1) ###
+
+Codex, you have read the full brief above. To ensure nothing is skipped and code is not abbreviated, we will build this step-by-step. 
+
+For this specific response, you must execute ONLY Step 1 from the "WORKFLOW AND OUTPUT FORMAT" section:
+1. Provide the terminal command to initialize the Next.js project.
+2. Create the folder structure exactly as defined in the "FILE STRUCTURE" section (provide mkdir commands or instructions).
+3. Set up the configuration files: `tailwind.config.ts`, `app/globals.css`, `app/layout.tsx`, `package.json` (scripts), and `scripts/check-placeholders.mjs`. Apply the exact colors, fonts, and setup rules defined in the brief.
+
+Do NOT generate the `/data` files, components, or pages yet. Stop after the configuration, folder structure, and placeholder script are complete. Wait for my confirmation to proceed to Step 2.
+
+
+
+# CURRENT TASK: EXECUTE PASS 1 (PART A) ONLY ###
+
+Codex, read the EXECUTION NOTES above. We are starting Pass 1 right now, but we will split it into two parts to verify the setup. 
+
+For this response, do ONLY "Part A" of Pass 1:
+1. Provide the exact terminal commands to initialize the Next.js project and create ALL the empty folders defined in the FILE STRUCTURE section (use `mkdir -p` or `.gitkeep`).
+2. Set up the configuration files: `tailwind.config.ts`, `app/globals.css`, `app/layout.tsx`, `package.json`, and `scripts/check-placeholders.mjs`.
+3. Apply the EXACT logo instructions, color variables (--brand-navy: #112738, etc.), and font setups (Playfair Display + Source Sans 3) from the BRAND ASSETS section.
+
+Do NOT generate the `/data` files, UI primitives, or layout components yet. Stop after the configuration, folder structure, and placeholder script are complete. Wait for my confirmation to proceed to "Part B" of Pass 1.
