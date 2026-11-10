@@ -13,6 +13,8 @@ const config: Config = {
         gray: { 900: "var(--gray-900)", 600: "var(--gray-600)", 200: "var(--gray-200)" }
       },
       fontFamily: { heading: ["var(--font-playfair)", "serif"], body: ["var(--font-source-sans)", "sans-serif"] },
+      keyframes: { "area-menu-in": { from: { opacity: "0", transform: "translateY(-4px)" }, to: { opacity: "1", transform: "translateY(0)" } } },
+      animation: { "area-menu-in": "area-menu-in 150ms ease-out" },
       maxWidth: { content: "1200px" }
     }
   },

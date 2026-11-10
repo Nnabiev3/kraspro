@@ -1,0 +1,64 @@
+"use client";
+import { useState, type FormEvent } from "react";
+import { quoteSchema } from "@/lib/validators";
+import { services } from "@/data/services";
+
+type Props = { defaultService?: string };
+const fieldClass = "mt-1 w-full rounded-lg border border-gray-600 bg-white px-3 py-2 text-navy";
+
+/** Collects and validates a homeowner's quote request. */
+export default function QuoteForm({ defaultService = "" }: Props) {
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [status, setStatus] = useState("");
+  const [pending, setPending] = useState(false);
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const values = Object.fromEntries(data.entries());
+    const parsed = quoteSchema.safeParse({ ...values, consent: data.get("consent") === "on", website: "" });
+    const issues: Record<string, string> = {};
+    if (!parsed.success) {
+      for (const issue of parsed.error.issues) {
+        const key = String(issue.path[0]);
+        issues[key] ||= key === "consent" ? "Please confirm your consent." : "Please enter a valid value.";
+      }
+    }
+    const photo = data.get("photo");
+    if (photo instanceof File && photo.size > 1024 * 1024) issues.photo = "Choose an image no larger than 1 MB.";
+    if (photo instanceof File && photo.size && !["image/jpeg", "image/png", "image/webp"].includes(photo.type)) issues.photo = "Choose a JPEG, PNG or WebP image.";
+    setErrors(issues);
+    if (Object.keys(issues).length) return;
+    setPending(true);
+    setStatus("");
+    try {
+      const response = await fetch("/api/quote", { method: "POST", body: data });
+      const result: { message?: string } = await response.json();
+      if (!response.ok) throw new Error(result.message || "We could not submit your request.");
+      form.reset();
+      setStatus(result.message || "Your request was submitted.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "We could not submit your request. Please try again.");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  function error(name: string) { return errors[name] ? <p id={`${name}-error`} className="mt-1 text-sm font-semibold text-navy">{errors[name]}</p> : null; }
+  function attributes(name: string) { return { "aria-invalid": Boolean(errors[name]), "aria-describedby": errors[name] ? `${name}-error` : undefined }; }
+  return <form onSubmit={submit} noValidate className="space-y-4">
+    <div><label htmlFor="quote-name">Name</label><input className={fieldClass} id="quote-name" name="name" autoComplete="name" required maxLength={100} {...attributes("name")} />{error("name")}</div>
+    <div><label htmlFor="quote-phone">Phone</label><input className={fieldClass} id="quote-phone" name="phone" type="tel" autoComplete="tel" required maxLength={30} {...attributes("phone")} />{error("phone")}</div>
+    <div><label htmlFor="quote-email">Email</label><input className={fieldClass} id="quote-email" name="email" type="email" autoComplete="email" required maxLength={254} {...attributes("email")} />{error("email")}</div>
+    <div><label htmlFor="quote-zip">ZIP code</label><input className={fieldClass} id="quote-zip" name="zip" autoComplete="postal-code" required {...attributes("zip")} />{error("zip")}</div>
+    <div><label htmlFor="quote-service">Service</label><select className={fieldClass} id="quote-service" name="service" defaultValue={defaultService} required {...attributes("service")}><option value="">Select a service</option>{services.map(service => <option key={service.slug} value={service.slug}>{service.navLabel}</option>)}</select>{error("service")}</div>
+    <div><label htmlFor="quote-description">Project description</label><textarea className={fieldClass} id="quote-description" name="description" rows={4} maxLength={5000} required {...attributes("description")} />{error("description")}</div>
+    <div><label htmlFor="quote-photo">Photo (optional, JPEG, PNG or WebP, up to 1 MB)</label><input className={fieldClass} id="quote-photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" {...attributes("photo")} />{error("photo")}</div>
+    <div><label htmlFor="quote-preference">Preferred contact method</label><select className={fieldClass} id="quote-preference" name="preferredContact" defaultValue="phone" {...attributes("preferredContact")}><option value="phone">Phone</option><option value="email">Email</option></select>{error("preferredContact")}</div>
+    <div className="absolute -left-[10000px]" aria-hidden="true"><label htmlFor="company_website">Company website</label><input id="company_website" name="company_website" tabIndex={-1} autoComplete="off" /></div>
+    <div><label className="flex items-start gap-2"><input className="mt-1" type="checkbox" name="consent" required {...attributes("consent")} />I agree to be contacted about my project.</label>{error("consent")}</div>
+    <button disabled={pending} className="min-h-12 rounded-lg bg-teal px-6 py-3 font-semibold text-white underline-offset-4 hover:underline disabled:opacity-60">{pending ? "Sending…" : "Request a Free Quote"}</button>
+    {status && <p role="status" aria-live="polite">{status}</p>}
+  </form>;
+}
