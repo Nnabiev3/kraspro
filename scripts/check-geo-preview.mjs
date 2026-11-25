@@ -11,11 +11,20 @@ async function load(path) {
   return response.text();
 }
 const towns = ["reisterstown", "owings-mills", "pikesville"];
+const additionalDeckTowns = [
+  "baltimore", "bel-air", "bethesda", "catonsville", "college-park", "columbia",
+  "dundalk", "ellicott-city", "essex", "finksburg", "frederick", "glen-burnie",
+  "hanover", "laurel", "lutherville-timonium", "mt-airy", "parkton", "phoenix",
+  "rockville", "severn", "silver-spring", "sparks", "towson", "westminster",
+];
 const services = ["deck-building", "window-door-renewal", "bathroom-remodeling"];
-const routes = towns.flatMap(town => [
+const existingRoutes = towns.flatMap(town => [
   `/home-remodeling-${town}-md`,
   ...services.map(service => `/${service}-${town}-md`),
 ]);
+const newDeckRoutes = additionalDeckTowns.map(town => `/deck-building-${town}-md`);
+const deckRoutes = new Set([...existingRoutes.filter(path => path.startsWith("/deck-building-")), ...newDeckRoutes]);
+const routes = [...existingRoutes, ...newDeckRoutes];
 const pages = new Map();
 for (const path of ["/service-areas", ...routes, ...services.map(service => `/services/${service}`)]) {
   const html = await load(path);
@@ -46,8 +55,22 @@ for (const town of towns) {
     assert.match(pages.get(path), new RegExp(`<option[^>]*selected=""[^>]*value="${service}"|<option[^>]*value="${service}"[^>]*selected=""`), `Selected service: ${path}`);
   }
 }
+const deckDescriptions = new Set();
+for (const path of deckRoutes) {
+  const html = pages.get(path);
+  for (const overview of ["/services/deck-building", "/service-areas"]) {
+    assert(pages.get(overview).includes(`href="${path}"`), `${overview} links to ${path}`);
+  }
+  assert.match(html, /<option[^>]*selected=""[^>]*value="deck-building"|<option[^>]*value="deck-building"[^>]*selected=""/, `Selected deck service: ${path}`);
+  const description = html.match(/<meta name="description" content="([^"]+)"/)?.[1];
+  assert(description, `Meta description: ${path}`);
+  assert(!deckDescriptions.has(description), `Unique description: ${path}`);
+  deckDescriptions.add(description);
+}
 const sitemap = await load("/sitemap.xml");
-for (const path of routes) assert(!sitemap.includes(path), `Review page excluded from sitemap: ${path}`);
+for (const path of routes) {
+  assert.equal(sitemap.includes(path + "</loc>"), deckRoutes.has(path), `Sitemap publication status: ${path}`);
+}
 assert.equal((await fetch(new URL("/deck-building-unknown-town-md", base))).status, 404);
 const invalid = new FormData();
 invalid.set("city", "Reisterstown");

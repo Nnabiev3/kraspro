@@ -2,7 +2,7 @@ import { homeFaqs, homeFeaturedServices, homeHero, homeProcess, valueProps } fro
 import { locationPath, type Location } from "@/data/locations";
 import { deckCover, projects, servicePhotos, type Photo } from "@/data/projects";
 import { reviews } from "@/data/reviews";
-import { getGeoRoutes, serviceLocationPath, type ServiceLocation } from "@/data/service-locations";
+import { getGeoRoutes, type ServiceLocation, type ServiceLocationArea } from "@/data/service-locations";
 import { services, type Service } from "@/data/services";
 import { isConfirmed, site } from "@/data/site";
 
@@ -151,9 +151,9 @@ export function cityDefaults(location: Location) {
   };
 }
 
-export function geoServiceDefaults(entry: ServiceLocation, location: Location, service: Service) {
+export function geoServiceDefaults(entry: ServiceLocation, location: ServiceLocationArea, service: Service) {
   return {
-    ...metadata(`${entry.title} | KrasPro LLC`, entry.introduction),
+    ...metadata(`${entry.title} | KrasPro LLC`, entry.metaDescription ?? entry.introduction),
     title: entry.title,
     introduction: entry.introduction,
     focusTitle: entry.focusTitle,
@@ -191,9 +191,6 @@ export const cityPages = geo.flatMap(route => route.kind === "location"
   : []);
 export const geoServicePages = geo.flatMap(route => {
   if (route.kind !== "service") return [];
-  const { entry } = route;
-  const city = geo.find(item => item.kind === "location" && item.location.slug === entry.locationSlug);
-  const service = services.find(item => item.slug === entry.serviceSlug);
-  if (city?.kind !== "location" || !service) return [];
-  return [{ path: serviceLocationPath(entry), title: entry.title, defaults: geoServiceDefaults(entry, city.location, service) }];
+  const { path, entry, location, service } = route;
+  return [{ path, title: entry.title, defaults: geoServiceDefaults(entry, location, service) }];
 });

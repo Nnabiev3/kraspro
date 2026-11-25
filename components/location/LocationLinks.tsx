@@ -8,28 +8,23 @@ import { getServiceAreaLinks } from "@/data/site";
 
 export default function LocationLinks({ serviceSlug, excludeLocation }: { serviceSlug?: string; excludeLocation?: string }) {
   const locations = getActiveLocations();
-  const serviceLocations = new Set(
-    getActiveServiceLocations().filter(entry => entry.serviceSlug === serviceSlug).map(entry => entry.locationSlug),
-  );
-  const hrefFor = (slug: string, fallback: string) => serviceSlug && serviceLocations.has(slug)
-    ? serviceLocationPath({ serviceSlug, locationSlug: slug })
-    : fallback;
-
-  const areas = excludeLocation
-    ? locations
-        .filter(location => location.slug !== excludeLocation && (!serviceSlug || serviceLocations.has(location.slug)))
-        .map(location => ({ name: location.name, region: `${location.county}, MD`, href: hrefFor(location.slug, locationPath(location)) }))
-    : getServiceAreaLinks().map(area => {
-        const location = locations.find(item => item.name === area.name);
-        return location
-          ? { name: area.name, region: `${location.county}, MD`, href: hrefFor(location.slug, area.href) }
-          : { ...area, region: "Maryland" };
-      });
+  const serviceAreas = new Map((serviceSlug ? getActiveServiceLocations(serviceSlug) : []).map(entry => [entry.location.name, entry]));
+  const areas = getServiceAreaLinks().flatMap(area => {
+    const entry = serviceAreas.get(area.name);
+    const hub = entry?.location.hub ?? locations.find(location => location.name === area.name);
+    const slug = entry?.locationSlug ?? hub?.slug;
+    if (excludeLocation && (slug === excludeLocation || (serviceSlug ? !entry : !hub))) return [];
+    return [{
+      name: area.name,
+      region: hub ? `${hub.county}, MD` : "Maryland",
+      href: entry ? serviceLocationPath(entry) : excludeLocation && hub ? locationPath(hub) : area.href,
+    }];
+  });
 
   if (!areas.length) return null;
   return <section className="bg-surface py-14 md:py-20">
     <Container>
-      <SectionHeading title={excludeLocation ? "Explore nearby communities" : "Find this service near you"} description="Choose your community to explore the work and plan your next step." />
+      <SectionHeading title={serviceSlug === "deck-building" ? "Deck Building Service Areas" : excludeLocation ? "Explore nearby communities" : "Find this service near you"} description="Choose your community to explore the work and plan your next step." />
       <ul className="grid gap-4 sm:grid-cols-3">
         {areas.map(area => <li key={area.name}>
           <Link href={area.href} className="group flex h-full min-h-24 items-center gap-4 rounded-xl border border-gray-200 bg-white p-5 text-navy transition-colors hover:border-teal">

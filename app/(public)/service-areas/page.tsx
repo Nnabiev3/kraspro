@@ -55,11 +55,20 @@ export default async function ServiceAreasPage() {
         <Container>
           <SectionHeading title={content.communitiesTitle} />
           <ul aria-label="Maryland communities" className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-            {site.serviceAreas.filter(area => !locations.some(location => location.name === area)).map(area => (
-              <li key={area} id={serviceAreaId(area)} className="scroll-mt-24 rounded-xl border border-gray-200 bg-surface px-4 py-3 font-semibold text-navy target:border-teal target:bg-teal target:text-white">
-                {area}
-              </li>
-            ))}
+            {site.serviceAreas.filter(area => !locations.some(location => location.name === area)).map(area => {
+              const localServices = entries.filter(entry => entry.location.name === area);
+              return (
+                <li key={area} id={serviceAreaId(area)} className="scroll-mt-24 rounded-xl border border-gray-200 bg-surface px-4 py-3 font-semibold text-navy target:border-teal target:bg-teal target:text-white">
+                  {area}
+                  {localServices.map(entry => (
+                    <Link key={entry.serviceSlug} href={serviceLocationPath(entry)} className="mt-1 block text-sm underline underline-offset-4">
+                      {services.find(service => service.slug === entry.serviceSlug)!.navLabel}
+                      <span className="sr-only"> in {area}</span>
+                    </Link>
+                  ))}
+                </li>
+              );
+            })}
           </ul>
           <p className="mt-6 text-gray-600">{content.coverageNote}</p>
         </Container>

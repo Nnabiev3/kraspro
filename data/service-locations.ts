@@ -1,4 +1,5 @@
 import { locations, locationPath, type Location, type PublicationStatus } from "./locations";
+import { deckCities } from "./deck-building-locations";
 import { site } from "./site";
 import { services, type Faq } from "./services";
 
@@ -7,6 +8,7 @@ export type ServiceLocation = {
   locationSlug: string;
   status: PublicationStatus;
   title: string;
+  metaDescription?: string;
   introduction: string;
   focusTitle: string;
   paragraphs: string[];
@@ -14,9 +16,17 @@ export type ServiceLocation = {
   faqs: Faq[];
 };
 
+const deckBuildingLocations: ServiceLocation[] = deckCities.map(({ slug, name, ...copy }) => ({
+  ...copy,
+  serviceSlug: "deck-building",
+  locationSlug: slug,
+  status: "published",
+  title: `Deck Building in ${name}, MD`,
+}));
+
 export const serviceLocations: ServiceLocation[] = [
   {
-    serviceSlug: "deck-building", locationSlug: "reisterstown", status: "review",
+    serviceSlug: "deck-building", locationSlug: "reisterstown", status: "published",
     title: "Deck Building in Reisterstown, MD",
     introduction: "Refresh the deck you have or plan a new place to spend time outside. We start with the frame, the connection to the house and the way you want to reach the yard.",
     focusTitle: "Repair, resurface or start again?",
@@ -25,7 +35,7 @@ export const serviceLocations: ServiceLocation[] = [
     faqs: [{ question: "Can you work with my existing deck in Reisterstown?", answer: "Start by sending an overall photo and close-ups of the areas that concern you. The condition of the structure determines whether repair or resurfacing is worth considering." }, { question: "What should I send for a new deck inquiry?", answer: "Include your address, a photo of the back of the house and a description of how you want to use the deck. Approximate dimensions are helpful if you have them." }],
   },
   {
-    serviceSlug: "deck-building", locationSlug: "owings-mills", status: "review",
+    serviceSlug: "deck-building", locationSlug: "owings-mills", status: "published",
     title: "Deck Building in Owings Mills, MD",
     introduction: "Make the connection between your home and yard work better. Discuss a new deck, replacement stairs or resurfacing, with the layout and site access considered together.",
     focusTitle: "Design around the way you use the yard",
@@ -34,7 +44,7 @@ export const serviceLocations: ServiceLocation[] = [
     faqs: [{ question: "Can the stairs move when I replace my deck?", answer: "A new stair location may be possible, depending on the layout, site and requirements for the proposed work. Share a photo showing both the deck and the yard." }, { question: "Should I check with my association?", answer: "If your property has an association, ask whether it has an approval process for exterior changes. Share any relevant documents when discussing the project." }],
   },
   {
-    serviceSlug: "deck-building", locationSlug: "pikesville", status: "review",
+    serviceSlug: "deck-building", locationSlug: "pikesville", status: "published",
     title: "Deck Building in Pikesville, MD",
     introduction: "Choose a deck scope that fits your home and the upkeep you want. Compare repairs, a new surface or a replacement structure before committing to finishes.",
     focusTitle: "Choose the structure before the finish",
@@ -42,6 +52,7 @@ export const serviceLocations: ServiceLocation[] = [
     checklist: ["Repairs versus complete replacement", "Rails, steps and edge details", "Material appearance and upkeep", "Connections and framing that will remain"],
     faqs: [{ question: "Can new decking go over my existing frame?", answer: "Only if the frame and its connections are suitable for the proposed work. The condition of the boards alone is not enough to make that decision." }, { question: "How do I compare deck quotes?", answer: "Check whether each quote includes removal, framing repairs, stairs, rails and the same material specification. Different scopes can make the totals difficult to compare." }],
   },
+  ...deckBuildingLocations,
   {
     serviceSlug: "window-door-renewal", locationSlug: "reisterstown", status: "review",
     title: "Window & Door Renewal in Reisterstown, MD",
@@ -102,17 +113,37 @@ export const serviceLocationPath = (entry: Pick<ServiceLocation, "serviceSlug" |
 export function getActiveLocations(): Location[] {
   return locations.filter(location => location.status !== "draft" && site.serviceAreas.includes(location.name));
 }
-export function getActiveServiceLocations(): ServiceLocation[] {
-  return serviceLocations.filter(entry => entry.status !== "draft" && getActiveLocations().some(location => location.slug === entry.locationSlug) && services.some(service => service.slug === entry.serviceSlug));
+
+export type ServiceLocationArea = { slug: string; name: string; hub?: Location };
+
+export function getServiceLocationArea(entry: ServiceLocation): ServiceLocationArea | undefined {
+  const hub = getActiveLocations().find(location => location.slug === entry.locationSlug);
+  if (hub) return { slug: hub.slug, name: hub.name, hub };
+
+  if (entry.serviceSlug === "deck-building") {
+    const city = deckCities.find(location => location.slug === entry.locationSlug);
+    if (city && site.serviceAreas.includes(city.name)) return { slug: city.slug, name: city.name };
+  }
+}
+
+export function getActiveServiceLocations(serviceSlug?: string) {
+  return serviceLocations.flatMap(entry => {
+    if (entry.status === "draft" || (serviceSlug && entry.serviceSlug !== serviceSlug)) return [];
+    const location = getServiceLocationArea(entry);
+    const service = services.find(service => service.slug === entry.serviceSlug);
+    return location && service ? [{ ...entry, location, service }] : [];
+  });
 }
 export function getGeoRoutes() {
   return [
     ...getActiveLocations().map(location => ({ path: locationPath(location), status: location.status, kind: "location" as const, location })),
     ...getActiveServiceLocations().map(entry => ({
       path: serviceLocationPath(entry),
-      status: entry.status === "published" && getActiveLocations().some(location => location.slug === entry.locationSlug && location.status === "published") ? "published" as const : "review" as const,
+      status: entry.serviceSlug === "deck-building" || entry.location.hub?.status === "published" ? entry.status : "review" as const,
       kind: "service" as const,
       entry,
+      location: entry.location,
+      service: entry.service,
     })),
   ];
 }
