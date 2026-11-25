@@ -74,7 +74,7 @@ export const site: SiteConfig = {
   reviewUrl: "TODO_OWNER: review URL",
   story: "TODO_OWNER: company story",
   financing: "TODO_OWNER: confirm financing partner, terms and disclosures",
-  siteUrl: "TODO_OWNER: site URL",
+  siteUrl: "https://kraspro.opora-money.workers.dev",
 
   // --- Trust Flags (Config-driven claims) ---
   trust: {
