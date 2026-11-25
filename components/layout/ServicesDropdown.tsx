@@ -2,18 +2,18 @@
 
 import Link from "next/link";
 import { useId } from "react";
-import { services } from "@/data/services";
+import type { Service } from "@/data/services";
 import DropdownChevron from "./DropdownChevron";
 import { useHeaderDropdown } from "./useHeaderDropdown";
 
 /** Desktop services link and keyboard-operable disclosure. */
-export default function ServicesDropdown() {
+export default function ServicesDropdown({ label, services }: { label: string; services: Pick<Service, "slug" | "navLabel">[] }) {
   const menu = useHeaderDropdown("services", true);
   const panelId = useId();
   return (
     <div ref={menu.root} className="relative" onBlur={menu.onBlur} onKeyDown={menu.onKeyDown} onPointerEnter={menu.onPointerEnter} onPointerLeave={menu.onPointerLeave}>
       <div className="flex items-center gap-1">
-        <Link href="/services" onClick={menu.close} className="underline-offset-4 hover:underline hover:decoration-teal-light">Services</Link>
+        <Link href="/services" onClick={menu.close} className="underline-offset-4 hover:underline hover:decoration-teal-light">{label}</Link>
         <button ref={menu.trigger} type="button" aria-label="Toggle services menu" aria-expanded={menu.open} aria-haspopup="true" aria-controls={panelId} onClick={menu.toggle} className="inline-flex min-h-11 min-w-6 items-center justify-center">
           <DropdownChevron open={menu.open} />
         </button>

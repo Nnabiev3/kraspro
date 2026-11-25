@@ -10,14 +10,14 @@ export default function FAQAccordion({ title, faqs }: { title: string; faqs: rea
     <section aria-label={title} className="bg-white py-14 md:py-24">
       <Container>
         <SectionHeading title={title} />
-        <div className="grid max-w-3xl gap-3">
+        <div className="max-w-3xl divide-y divide-navy/15 border-y border-navy/15">
           {faqs.map(faq => (
-            <details key={faq.question} className="group rounded-xl border border-gray-200 bg-cream">
-              <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 rounded-xl px-5 py-4 text-lg font-semibold text-navy hover:underline [&::-webkit-details-marker]:hidden">
+            <details key={faq.question} className="group open:bg-surface">
+              <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 text-lg font-semibold text-navy transition-colors hover:bg-teal-50 [&::-webkit-details-marker]:hidden">
                 {faq.question}
-                <ChevronDown aria-hidden="true" className="size-5 shrink-0 text-teal group-open:rotate-180" />
+                <ChevronDown aria-hidden="true" className="size-5 shrink-0 text-teal group-open:rotate-180 motion-safe:transition-transform" />
               </summary>
-              <p className="px-5 pb-5 text-gray-600">{faq.answer}</p>
+              <p className="px-4 pb-5 text-gray-600">{faq.answer}</p>
             </details>
           ))}
         </div>

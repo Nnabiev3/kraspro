@@ -5,8 +5,16 @@
   "compatibility_date": "2025-12-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "workers_dev": true,
+  "d1_databases": [
+    {
+      "binding": "KRASPRO_CONTENT",
+      "database_name": "kraspro-content",
+      "database_id": "df93cd50-b9e3-4c96-a7f0-1b52daaf9fce"
+    }
+  ],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   }
 }
+

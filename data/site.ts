@@ -2,6 +2,8 @@
 // TYPES & INTERFACES
 // ==========================================
 
+import { locations, locationPath } from "./locations";
+
 export type NavItem = {
   label: string;
   href: string;
@@ -105,18 +107,33 @@ export const site: SiteConfig = {
 
   // --- Service Areas ---
   serviceAreas: [
-    "Baltimore County",
-    "Reisterstown",
-    "Owings Mills",
-    "Pikesville",
-    "Towson",
-    "Randallstown",
-    "Cockeysville",
+    "Baltimore",
+    "Bel Air",
+    "Bethesda",
     "Catonsville",
-    "Baltimore City",
-    "Carroll County",
-    "Howard County",
-    "Harford County",
+    "College Park",
+    "Columbia",
+    "Dundalk",
+    "Ellicott City",
+    "Essex",
+    "Finksburg",
+    "Frederick",
+    "Glen Burnie",
+    "Hanover",
+    "Laurel",
+    "Lutherville-Timonium",
+    "Mt. Airy",
+    "Owings Mills",
+    "Parkton",
+    "Phoenix",
+    "Pikesville",
+    "Reisterstown",
+    "Rockville",
+    "Severn",
+    "Silver Spring",
+    "Sparks",
+    "Towson",
+    "Westminster",
   ],
 
   sameAs: [], // Add social media links here later (e.g., ["https://facebook.com/..."])
@@ -145,12 +162,15 @@ export function serviceAreaId(name: string): string {
     .replace(/^-|-$/g, "");
 }
 
-/** Returns the existing flat service-area list as sorted links. */
+/** Links detailed communities to their hubs and other coverage areas to the directory. */
 export function getServiceAreaLinks(): ServiceAreaLink[] {
   return [...new Set(site.serviceAreas)]
     .sort((first, second) => first.localeCompare(second))
     .map((name) => ({
       name,
-      href: `/service-areas#${serviceAreaId(name)}`,
+      href: (() => {
+        const location = locations.find(item => item.name === name && item.status !== "draft");
+        return location ? locationPath(location) : `/service-areas#${serviceAreaId(name)}`;
+      })(),
     }));
 }

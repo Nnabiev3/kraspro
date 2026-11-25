@@ -37,8 +37,9 @@ export async function POST(request: Request) {
     const data = await new Request(request.url, { method: "POST", headers: request.headers, body }).formData();
     if (data.get("company_website")) return NextResponse.json({ message: "Your request was submitted." });
     const parsed = quoteSchema.safeParse({
-      name: data.get("name"), phone: data.get("phone"), email: data.get("email"), zip: data.get("zip"),
-      service: data.get("service"), description: data.get("description"), preferredContact: data.get("preferredContact"),
+      name: data.get("name"), phone: data.get("phone") ?? undefined, email: data.get("email") ?? undefined, zip: data.get("zip"),
+      service: data.get("service"), description: data.get("description") ?? undefined, preferredContact: data.get("preferredContact"),
+      city: data.get("city") ?? undefined, sourcePage: data.get("sourcePage") ?? undefined,
       consent: data.get("consent") === "on", website: ""
     });
     if (!parsed.success || !services.some(service => service.slug === parsed.data.service)) return NextResponse.json({ message: "Please check your contact and project details." }, { status: 400 });
@@ -48,9 +49,7 @@ export async function POST(request: Request) {
     if (process.env.NODE_ENV === "production" || process.env.RESEND_API_KEY || process.env.SMTP_HOST) {
       return NextResponse.json({ message: "Quote delivery is not configured. Please contact us another way." }, { status: 503 });
     }
-    const attachment = photo instanceof File && photo.size ? { name: photo.name, type: photo.type, data: Buffer.from(await photo.arrayBuffer()).toString("base64") } : undefined;
-    console.info("Quote submission (development only):", { ...parsed.data, photo: attachment });
-    return NextResponse.json({ message: "Your request was recorded for testing. Delivery is not yet configured." });
+    return NextResponse.json({ message: "Your test request passed validation. Delivery is not yet configured." });
   } catch {
     return NextResponse.json({ message: "We could not process your request. Please try again." }, { status: 400 });
   }

@@ -51,12 +51,12 @@ export default function ServiceAreasDropdown({ variant, label = "Service areas",
       )}
       {menu.open && (
         <div id={panelId} className={desktop ? "absolute inset-x-0 top-full z-50 pt-4" : "mt-1"}>
-          <div className={desktop ? "rounded-b-lg border border-gray-200 bg-white p-6 shadow-lg motion-safe:animate-area-menu-in" : "border-l border-gray-600 pl-4"}>
+          <div className={desktop ? "max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-b-lg border border-gray-200 bg-white p-6 shadow-lg motion-safe:animate-area-menu-in" : "border-l border-gray-600 pl-4"}>
             {/* These are navigation links rather than an ARIA menu of application commands. */}
             <ul className={desktop ? "grid grid-cols-2 gap-x-8 gap-y-3 lg:grid-cols-4" : "grid grid-cols-1"}>
               {areas.map((area, index) => (
                 <li key={area.name}>
-                  <Link ref={index === 0 ? menu.firstLink : undefined} href={area.href} className={linkClass} onClick={navigate}>{area.name}</Link>
+                  <a ref={index === 0 ? menu.firstLink : undefined} href={area.href} className={linkClass} onClick={navigate}>{area.name}</a>
                 </li>
               ))}
             </ul>

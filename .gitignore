@@ -1,5 +1,6 @@
 node_modules/
 .next/
+preview-build/
 .open-next/
 .wrangler/
 .dev.vars*
@@ -9,3 +10,4 @@ out/
 !.env.example
 *.tsbuildinfo
 next-env.d.ts
+.kraspro-cms/

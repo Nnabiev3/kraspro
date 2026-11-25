@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS cms_documents (
+  id TEXT PRIMARY KEY,
+  content TEXT NOT NULL,
+  revision INTEGER NOT NULL DEFAULT 1
+);

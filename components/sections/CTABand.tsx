@@ -1,13 +1,14 @@
 import type { ReactNode } from "react";
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
-import { isConfirmed, site } from "@/data/site";
+import { readGeneral } from "@/lib/cms/public";
+import { isConfirmed } from "@/data/site";
 
 /** Prompts the visitor to get a quote and can also host an inline form. */
-export default function CTABand({ title, description, children }: { title: string; description: string; children?: ReactNode }) {
-  const { phone, email } = site;
+export default async function CTABand({ title, description, children }: { title: string; description: string; children?: ReactNode }) {
+  const { phone, email } = await readGeneral();
   return (
-    <section aria-labelledby="quote-title" className="bg-navy py-14 text-white md:py-24">
+    <section aria-labelledby="quote-title" className="dark-surface bg-[var(--brand-deep)] py-14 text-white md:py-24">
       <Container className="grid items-start gap-8 md:grid-cols-2">
         <div>
           <h2 id="quote-title" className="font-heading text-3xl font-semibold leading-tight md:text-4xl">{title}</h2>
