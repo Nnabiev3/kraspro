@@ -12,7 +12,7 @@ export const generateMetadata = () => editedMetadata("/about", aboutDefaults);
 export default async function AboutPage() {
   const [content, site] = await Promise.all([readPage("/about", aboutDefaults), readSite()]);
   const credentials = [
-    site.trust.licensed && `Licensed in Maryland${isConfirmed(site.licenseNumber) ? ` � MHIC #${site.licenseNumber}` : ""}`,
+    site.trust.licensed && `Licensed in Maryland${isConfirmed(site.licenseNumber) ? ` · MHIC #${site.licenseNumber}` : ""}`,
     site.trust.insured && "Insured",
     isConfirmed(site.epaCertification) && site.epaCertification,
   ].filter((credential): credential is string => Boolean(credential));

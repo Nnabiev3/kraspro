@@ -171,14 +171,14 @@ export function geoServiceDefaults(entry: ServiceLocation, location: Location, s
 }
 
 export const standardPages = [
-  ["/", "�������", homeDefaults],
-  ["/about", "� ��������", aboutDefaults],
-  ["/contact", "���⠪�� � ���", contactDefaults],
-  ["/financing", "������஢����", financingDefaults],
-  ["/reviews", "����", reviewsDefaults],
-  ["/privacy", "����⨪� ���䨤��樠�쭮��", privacyDefaults],
-  ["/services", "��⠫�� ���", servicesDefaults],
-  ["/service-areas", "������ ���㦨�����", areasDefaults],
+  ["/", "Главная", homeDefaults],
+  ["/about", "О компании", aboutDefaults],
+  ["/contact", "Контакты и заявка", contactDefaults],
+  ["/financing", "Финансирование", financingDefaults],
+  ["/reviews", "Отзывы", reviewsDefaults],
+  ["/privacy", "Политика конфиденциальности", privacyDefaults],
+  ["/services", "Каталог услуг", servicesDefaults],
+  ["/service-areas", "Районы обслуживания", areasDefaults],
 ] as const;
 
 export const servicePages = services.map(service => ({

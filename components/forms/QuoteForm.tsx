@@ -83,7 +83,7 @@ export default function QuoteForm({ defaultService = "", defaultCity = "", sourc
     <div><label htmlFor="quote-photo">Photo (optional, JPEG, PNG or WebP, up to 1 MB)</label><input className={fieldClass} id="quote-photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" {...attributes("photo")} />{error("photo")}</div>
     <div className="absolute -left-[10000px]" aria-hidden="true"><label htmlFor="company_website">Company website</label><input id="company_website" name="company_website" tabIndex={-1} autoComplete="off" /></div>
     <div><label className="flex items-start gap-2"><input className="mt-1" type="checkbox" name="consent" required {...attributes("consent")} />I agree to be contacted about my project.</label>{error("consent")}</div>
-    <button disabled={pending} className="button-primary min-h-12 rounded-full px-6 py-3 font-semibold transition-colors disabled:opacity-60">{pending ? "Sending:" : "Request a Free Quote"}</button>
+    <button disabled={pending} className="button-primary min-h-12 rounded-full px-6 py-3 font-semibold transition-colors disabled:opacity-60">{pending ? "Sending…" : "Request a Free Quote"}</button>
     {status && <p role="status" aria-live="polite">{status}</p>}
   </form>;
 }

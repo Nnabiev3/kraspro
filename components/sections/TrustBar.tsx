@@ -11,9 +11,9 @@ export default async function TrustBar({ reviews }: { reviews: Review[] }) {
     ? (reviews.reduce((total, review) => total + review.rating, 0) / reviews.length).toFixed(1)
     : null;
   const labels = [
-    trust.licensed && (isConfirmed(licenseNumber) ? `Maryland Home Improvement � MHIC #${licenseNumber}` : trustText.licensed),
+    trust.licensed && (isConfirmed(licenseNumber) ? `Maryland Home Improvement · MHIC #${licenseNumber}` : trustText.licensed),
     trust.insured && trustText.insured,
-    rating ? `${rating} out of 5 � ${reviews.length} ${reviews.length === 1 ? "review" : "reviews"}` : trust.photoEvidence && trustText.photoEvidence,
+    rating ? `${rating} out of 5 · ${reviews.length} ${reviews.length === 1 ? "review" : "reviews"}` : trust.photoEvidence && trustText.photoEvidence,
     !rating && trust.itemizedQuotes && trustText.itemizedQuotes,
   ].filter((label): label is string => Boolean(label));
 

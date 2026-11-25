@@ -57,9 +57,9 @@ export default async function Footer() {
         </div>
         <div className="mt-9 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-white/20 pt-4 text-sm text-white/70 sm:mt-12">
           <p>
-            c {new Date().getFullYear()} {site.name}
-            {isConfirmed(site.licenseNumber) && ` � MHIC #${site.licenseNumber}`}
-            {isConfirmed(site.epaCertification) && ` � ${site.epaCertification}`}
+            © {new Date().getFullYear()} {site.name}
+            {isConfirmed(site.licenseNumber) && ` · MHIC #${site.licenseNumber}`}
+            {isConfirmed(site.epaCertification) && ` · ${site.epaCertification}`}
           </p>
           {footer.privacy.label && <Link className={footerLink} href={footer.privacy.href}>{footer.privacy.label}</Link>}
         </div>

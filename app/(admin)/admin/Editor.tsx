@@ -23,15 +23,15 @@ function Field({ name, value, update, services, parent, item }: FieldProps) {
       {value.map((entry, index) => {
         const fields = typeof entry === "object" && !Array.isArray(entry) ? entry : undefined;
         const summary = fields?.label || fields?.title || fields?.question || fields?.name || (typeof entry === "string" && entry);
-        const title = typeof summary === "string" ? summary : "���� �������";
+        const title = typeof summary === "string" ? summary : "Новый элемент";
         return <details className="cms-list-item" key={index}>
           <summary><span>{index + 1}. {title}</span></summary>
           <div className="cms-list-content">
             <Field name={name} value={entry} update={next => update(value.map((original, i) => i === index ? next : original))} services={services} parent={name} item />
             <div className="cms-row-actions">
-              <button type="button" className="cms-icon" disabled={index === 0} onClick={() => move(index, -1)} aria-label="���"><ArrowUp size={16} /></button>
-              <button type="button" className="cms-icon" disabled={index === value.length - 1} onClick={() => move(index, 1)} aria-label="����"><ArrowDown size={16} /></button>
-              <button type="button" className="cms-remove" onClick={() => update(value.filter((_, i) => i !== index))}><Trash2 size={15} /> �������</button>
+              <button type="button" className="cms-icon" disabled={index === 0} onClick={() => move(index, -1)} aria-label="Выше"><ArrowUp size={16} /></button>
+              <button type="button" className="cms-icon" disabled={index === value.length - 1} onClick={() => move(index, 1)} aria-label="Ниже"><ArrowDown size={16} /></button>
+              <button type="button" className="cms-remove" onClick={() => update(value.filter((_, i) => i !== index))}><Trash2 size={15} /> Удалить</button>
             </div>
           </div>
         </details>;
@@ -45,7 +45,7 @@ function Field({ name, value, update, services, parent, item }: FieldProps) {
           last.open = true;
           last.querySelector<HTMLElement>("input, textarea, select")?.focus();
         });
-      }} disabled={value.length >= 40}><Plus size={16} /> ��������</button>
+      }} disabled={value.length >= 40}><Plus size={16} /> Добавить</button>
     </fieldset>;
   }
   if (typeof value === "object") {
@@ -56,9 +56,9 @@ function Field({ name, value, update, services, parent, item }: FieldProps) {
   if (typeof value === "number") return <label className="cms-field"><span>{label}</span><select value={value} onChange={event => update(Number(event.target.value))}>{[1, 2, 3, 4, 5].map(rating => <option key={rating}>{rating}</option>)}</select></label>;
   const image = (name === "logo" || name === "src") && isImageSource(value);
   return <label className="cms-field">
-    <span>{item ? options ? "��㣠" : name === "sameAs" ? "����" : "�����" : label}</span>
+    <span>{item ? options ? "Услуга" : name === "sameAs" ? "Адрес" : "Текст" : label}</span>
     {options ? <select value={value} onChange={event => update(event.target.value)}>
-      <option value="">�롥�� ����</option>
+      <option value="">Выберите услугу</option>
       {options.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
     </select> : longFields.has(name) ? <textarea rows={value.length > 160 ? 5 : 3} value={value} onChange={event => update(event.target.value)} />
       : <input type={name === "date" ? "date" : name === "email" ? "email" : name === "phone" ? "tel" : "text"} value={value} onChange={event => update(event.target.value)} />}
@@ -96,10 +96,10 @@ export default function Editor({ id, title, path, initial, panels, services }: {
       } else if (result.values && result.revision !== undefined) {
         setValues(result.values);
         setSaved({ values: result.values, revision: result.revision });
-        setMessage({ text: "��������� ��㡫�������.", error: false });
+        setMessage({ text: "Изменения опубликованы.", error: false });
       }
     } catch {
-      setMessage({ text: "���� ��ࢠ����. �஢���� ��࠭��� ��। ����୮� �㡫���樥�.", error: true });
+      setMessage({ text: "Связь прервалась. Проверьте страницу перед повторной публикацией.", error: true });
     } finally {
       setPending(false);
     }
@@ -108,9 +108,9 @@ export default function Editor({ id, title, path, initial, panels, services }: {
   return <form className="cms-editor" onSubmit={submit}>
     <div className="cms-document-head">
       <div><h2>{title}</h2>{path && <span className="cms-path">{path}</span>}</div>
-      {path && <a href={path} target="_blank" rel="noreferrer" className="cms-secondary">������ ��࠭��� <ExternalLink size={15} /></a>}
+      {path && <a href={path} target="_blank" rel="noreferrer" className="cms-secondary">Открыть страницу <ExternalLink size={15} /></a>}
     </div>
-    {panels.length > 1 && <div className="cms-tabs" aria-label="������� ।����">
+    {panels.length > 1 && <div className="cms-tabs" aria-label="Разделы редактора">
       {panels.map((item, index) => <button type="button" key={item.title} aria-pressed={panel === index} onClick={() => setPanel(index)}>{item.title}</button>)}
     </div>}
     <fieldset disabled={pending} className="cms-fields">
@@ -121,12 +121,11 @@ export default function Editor({ id, title, path, initial, panels, services }: {
       }} services={services} />)}
     </fieldset>
     <div className="cms-publish">
-      <p role={message.error ? "alert" : "status"} className={message.error ? "cms-error" : undefined}>{message.text || (dirty ? "���� ����㡫�������� ���������" : saved.revision ? "��������� ��㡫�������" : "��室��� ����� ᠩ�")}</p>
+      <p role={message.error ? "alert" : "status"} className={message.error ? "cms-error" : undefined}>{message.text || (dirty ? "Есть неопубликованные изменения" : saved.revision ? "Изменения опубликованы" : "Исходная версия сайта")}</p>
       <div className="cms-publish-actions">
-        {dirty && <button type="button" className="cms-secondary" disabled={pending} onClick={() => { setValues(saved.values); setMessage({ text: "����⠭������ ��㡫��������� �����.", error: false }); }}>�⬥���� ���������</button>}
-        <button type="submit" className="cms-primary" disabled={!dirty || pending}>{pending ? "�㡫��㥬:" : "��㡫�������"}</button>
+        {dirty && <button type="button" className="cms-secondary" disabled={pending} onClick={() => { setValues(saved.values); setMessage({ text: "Восстановлена опубликованная версия.", error: false }); }}>Отменить изменения</button>}
+        <button type="submit" className="cms-primary" disabled={!dirty || pending}>{pending ? "Публикуем…" : "Опубликовать"}</button>
       </div>
     </div>
   </form>;
 }
-

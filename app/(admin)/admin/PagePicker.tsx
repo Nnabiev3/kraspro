@@ -12,8 +12,8 @@ export default function PagePicker({ groups, current }: { groups: PageGroup[]; c
     ...group, pages: group.pages.filter(page => (page.title + " " + page.path).toLowerCase().includes(needle)),
   })).filter(group => group.pages.length);
   return <div className="cms-picker">
-    <label className="cms-search"><Search size={17} aria-hidden="true" /><input placeholder="�������� ��� URL" aria-label="���� ��࠭���" type="search" value={query} onChange={event => setQuery(event.target.value)} /></label>
-    {!filtered.length && <p>��࠭��� �� �������.</p>}
+    <label className="cms-search"><Search size={17} aria-hidden="true" /><input placeholder="Название или URL" aria-label="Найти страницу" type="search" value={query} onChange={event => setQuery(event.target.value)} /></label>
+    {!filtered.length && <p>Страницы не найдены.</p>}
     {filtered.map(group => <details key={group.title} open={Boolean(needle) || group.pages.some(page => page.path === current) || group === filtered[0]}>
       <summary>{group.title} <span className="cms-count">{group.pages.length}</span></summary>
       <ul>{group.pages.map(page => <li key={page.path}>
@@ -24,4 +24,3 @@ export default function PagePicker({ groups, current }: { groups: PageGroup[]; c
     </details>)}
   </div>;
 }
-
