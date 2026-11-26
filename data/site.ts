@@ -59,7 +59,7 @@ export const site: SiteConfig = {
   location: "Reisterstown, Baltimore County, Maryland",
 
   // --- Contact Info ---
-  phone: "TODO_OWNER: phone",
+  phone: "+1-410-967-6363",
   email: "TODO_OWNER: email",
   streetAddress: "TODO_OWNER: street address",
   postalCode: "TODO_OWNER: ZIP code",

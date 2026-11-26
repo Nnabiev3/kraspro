@@ -6,7 +6,7 @@ import { locationPath } from "@/data/locations";
 import { getActiveLocations, getActiveServiceLocations, serviceLocationPath } from "@/data/service-locations";
 import { getServiceAreaLinks } from "@/data/site";
 
-export default function LocationLinks({ serviceSlug, excludeLocation }: { serviceSlug?: string; excludeLocation?: string }) {
+export default function LocationLinks({ serviceSlug, excludeLocation, nearby }: { serviceSlug?: string; excludeLocation?: string; nearby?: readonly string[] }) {
   const locations = getActiveLocations();
   const serviceAreas = new Map((serviceSlug ? getActiveServiceLocations(serviceSlug) : []).map(entry => [entry.location.name, entry]));
   const areas = getServiceAreaLinks().flatMap(area => {
@@ -14,6 +14,7 @@ export default function LocationLinks({ serviceSlug, excludeLocation }: { servic
     const hub = entry?.location.hub ?? locations.find(location => location.name === area.name);
     const slug = entry?.locationSlug ?? hub?.slug;
     if (excludeLocation && (slug === excludeLocation || (serviceSlug ? !entry : !hub))) return [];
+    if (nearby && (!slug || !nearby.includes(slug))) return [];
     return [{
       name: area.name,
       region: hub ? `${hub.county}, MD` : "Maryland",
@@ -22,7 +23,7 @@ export default function LocationLinks({ serviceSlug, excludeLocation }: { servic
   });
 
   if (!areas.length) return null;
-  return <section className="bg-surface py-14 md:py-20">
+  return <section id={serviceSlug && !excludeLocation ? "service-cities" : undefined} className="scroll-mt-24 bg-surface py-14 md:py-20">
     <Container>
       <SectionHeading title={serviceSlug === "deck-building" ? "Deck Building Service Areas" : excludeLocation ? "Explore nearby communities" : "Find this service near you"} description="Choose your community to explore the work and plan your next step." />
       <ul className="grid gap-4 sm:grid-cols-3">

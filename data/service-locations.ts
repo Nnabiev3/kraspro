@@ -3,6 +3,11 @@ import { deckCities } from "./deck-building-locations";
 import { paintingCities } from "./exterior-painting-locations";
 import { renewalCities } from "./window-door-renewal-locations";
 import { restorationCities } from "./historic-window-restoration-locations";
+import { houseRestorationCities } from "./house-restoration-locations";
+import { powerWashingCities } from "./power-washing-locations";
+import { basementCities } from "./basement-remodeling-locations";
+import { kitchenCities } from "./kitchen-remodeling-locations";
+import { bathroomCities } from "./bathroom-remodeling-locations";
 import { serviceAreaId, site } from "./site";
 import { services, type Faq } from "./services";
 
@@ -17,12 +22,24 @@ export type ServiceLocation = {
   paragraphs: string[];
   checklist: string[];
   faqs: Faq[];
+  guide?: {
+    nearby: string[];
+    pricingNote: string;
+    examples: { title: string; description: string }[];
+    sampleReviews: string[];
+  };
+  cta?: { title: string; description: string };
 };
 
 const paintingService = "exterior-painting-carpentry";
 const renewalService = "window-door-renewal";
 const restorationService = "historic-window-restoration";
-const standaloneCityServices = new Set(["deck-building", paintingService, renewalService, restorationService]);
+const houseRestorationService = "house-restoration";
+const powerWashingService = "power-washing";
+const basementService = "basement-remodeling";
+const kitchenService = "kitchen-remodeling";
+const bathroomService = "bathroom-remodeling";
+const standaloneCityServices = new Set(["deck-building", paintingService, renewalService, restorationService, houseRestorationService, powerWashingService, basementService, kitchenService, bathroomService]);
 
 const deckBuildingLocations: ServiceLocation[] = deckCities.map(({ slug, name, ...copy }) => ({
   ...copy,
@@ -54,6 +71,14 @@ const restorationLocations: ServiceLocation[] = restorationCities.map(({ name, .
   locationSlug: serviceAreaId(name),
   status: "published",
   title: `Historic Window Restoration in ${name}, MD`,
+}));
+
+const houseRestorationLocations: ServiceLocation[] = houseRestorationCities.map(({ name, ...copy }) => ({
+  ...copy,
+  serviceSlug: houseRestorationService,
+  locationSlug: serviceAreaId(name),
+  status: "published",
+  title: `House Restoration in ${name}, MD`,
 }));
 
 export const serviceLocations: ServiceLocation[] = [
@@ -88,33 +113,35 @@ export const serviceLocations: ServiceLocation[] = [
   ...paintingLocations,
   ...renewalLocations,
   ...restorationLocations,
-  {
-    serviceSlug: "bathroom-remodeling", locationSlug: "reisterstown", status: "review",
-    title: "Bathroom Remodeling in Reisterstown, MD",
-    introduction: "Give your bathroom a clear plan before choosing tile. Discuss the shower, storage and existing layout, then define which parts of the room need to change.",
-    focusTitle: "Start with what the room needs",
-    paragraphs: ["A Reisterstown bathroom renovation might keep the current layout or rethink how the room is used. Tell us which fixtures can stay, where storage is missing and what you want to change about the shower or bath.", "Tile is one part of the scope. Preparation behind the finish, fixture connections and ventilation also need consideration. Photos of the full room and the areas causing concern help frame that conversation."],
-    checklist: ["Layout and fixtures to retain", "Shower or bath priorities", "Storage and lighting goals", "Preparation and finishing scope"],
-    faqs: [{ question: "Can I keep my current bathroom layout?", answer: "Yes, retaining the layout can be one option to discuss. Existing conditions and the changes you want determine what else needs to be included." }, { question: "Should I choose tile before asking for a quote?", answer: "You can share preferences, but it helps to establish the layout and scope before finalising the tile and fixtures." }],
-  },
-  {
-    serviceSlug: "bathroom-remodeling", locationSlug: "owings-mills", status: "review",
-    title: "Bathroom Remodeling in Owings Mills, MD",
-    introduction: "Plan a bathroom renovation around daily use. Discuss shower access, storage and the work sequence, along with the finishes you have in mind.",
-    focusTitle: "Make room for the everyday routine",
-    paragraphs: ["For an Owings Mills bathroom project, start with the things that interrupt the daily routine: awkward storage, a shower that does not suit you or fixtures that need replacing. Prioritising these helps define a useful scope.", "Tell us whether there is another bathroom available during the work. Access, material deliveries and the order of the work are practical points to discuss before a start date is agreed."],
-    checklist: ["Shower access and fixture use", "Vanity and storage needs", "Bathroom availability during work", "Materials and work sequence"],
-    faqs: [{ question: "Can I change a tub to a shower?", answer: "That can be a project to discuss. The space, existing connections and proposed shower arrangement need to be reviewed before the scope is set." }, { question: "Can the bathroom stay in use during remodeling?", answer: "That depends on the work. Tell us if it is your only bathroom so the limitations and sequence can be discussed before scheduling." }],
-  },
-  {
-    serviceSlug: "bathroom-remodeling", locationSlug: "pikesville", status: "review",
-    title: "Bathroom Remodeling in Pikesville, MD",
-    introduction: "Bring the layout, fixtures and finishes into one plan. From a shower renovation to a broader room update, start with the parts of your bathroom that need attention.",
-    focusTitle: "A complete scope behind the new tile",
-    paragraphs: ["For a Pikesville bathroom renovation, a finish change and a layout change can mean very different amounts of work. Identify whether you want to renew the existing arrangement or move fixtures before comparing proposals.", "Discuss edges, niches, storage and transitions alongside the main tile selection. These details shape both the finished appearance and the preparation needed underneath it."],
-    checklist: ["Finish update or layout change", "Fixture positions and connections", "Niches, edges and transitions", "Preparation behind tiled surfaces"],
-    faqs: [{ question: "Can the quote include a shower niche?", answer: "Tell us the size and position you have in mind. The wall construction and proposed shower design need to be considered before confirming it." }, { question: "What makes bathroom quotes differ?", answer: "Compare demolition, preparation, fixture changes, tile areas and finishing details. A price for new tile alone covers a different scope from a room renovation." }],
-  },
+  ...houseRestorationLocations,
+  ...kitchenCities.map(({ name, ...copy }): ServiceLocation => ({
+    ...copy,
+    serviceSlug: kitchenService,
+    locationSlug: serviceAreaId(name),
+    status: "published",
+    title: `Kitchen Remodeling in ${name}, MD`,
+  })),
+  ...basementCities.map(({ name, ...copy }): ServiceLocation => ({
+    ...copy,
+    serviceSlug: basementService,
+    locationSlug: serviceAreaId(name),
+    status: "published",
+    title: `Basement Remodeling in ${name}, MD`,
+  })),
+  ...powerWashingCities.map(({ name, ...copy }): ServiceLocation => ({
+    ...copy,
+    serviceSlug: powerWashingService,
+    locationSlug: serviceAreaId(name),
+    status: "published",
+    title: `Power Washing in ${name}, MD`,
+  })),
+  ...bathroomCities.map(({ name, ...copy }): ServiceLocation => ({
+    ...copy,
+    serviceSlug: bathroomService,
+    locationSlug: serviceAreaId(name),
+    status: "published",
+    title: `Bathroom Remodeling in ${name}, MD`,
+  })),
 ];
 
 export const serviceLocationPath = (entry: Pick<ServiceLocation, "serviceSlug" | "locationSlug">) => `/${entry.serviceSlug}-${entry.locationSlug}-md`;

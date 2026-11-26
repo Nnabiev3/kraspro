@@ -41,6 +41,9 @@ export default function ServiceGrid({ services, title }: ServiceGridProps) {
                   <ArrowUpRight aria-hidden="true" className="size-5 motion-safe:transition-transform motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5" />
                 </span>
               </Link>
+              {["power-washing", "basement-remodeling", "kitchen-remodeling", "bathroom-remodeling"].includes(service.slug) && (
+                <Link href={`/services/${service.slug}#service-cities`} className="mx-2 mb-4 inline-block text-sm font-semibold text-teal underline underline-offset-4 sm:mx-4">Find {service.navLabel} in your city</Link>
+              )}
             </li>
           ))}
         </ul>

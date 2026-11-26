@@ -11,6 +11,7 @@ type HeroProps = {
   title: string;
   description: string;
   image: Service["heroImage"];
+  imageCaption?: string;
   home?: boolean;
   workHref?: string;
   quoteHref?: string;
@@ -19,7 +20,7 @@ type HeroProps = {
 const trustKeys = ["licensed", "insured", "itemizedQuotes", "noCommissionSales"] as const;
 
 /** Introduces the page and its quote action, with a phone link when configured. */
-export default async function Hero({ eyebrow, title, description, image, home = false, workHref, quoteHref = "/contact" }: HeroProps) {
+export default async function Hero({ eyebrow, title, description, image, imageCaption, home = false, workHref, quoteHref = "/contact" }: HeroProps) {
   if (home) {
     return (
       <section aria-labelledby="hero-title" className="home-hero hero-surface dark-surface flex items-center pb-[calc(5rem+env(safe-area-inset-bottom))] pt-8 sm:pt-12 lg:py-14">
@@ -89,6 +90,7 @@ export default async function Hero({ eyebrow, title, description, image, home = 
             data-tone={image.tone}
             className="project-photo object-cover"
           />
+          {imageCaption && <figcaption className="absolute bottom-3 right-3 rounded bg-navy/85 px-3 py-1 text-sm text-white">{imageCaption}</figcaption>}
         </figure>}
       </Container>
     </section>

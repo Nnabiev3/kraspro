@@ -152,6 +152,25 @@ export function cityDefaults(location: Location) {
 }
 
 export function geoServiceDefaults(entry: ServiceLocation, location: ServiceLocationArea, service: Service) {
+  const heroImage = image(service.heroImage);
+  const isBathroom = entry.serviceSlug === "bathroom-remodeling";
+  const photos = gallery(service.slug);
+  if (isBathroom) {
+    heroImage.src = "/images/projects/kraspro/shower-tiling.jpg";
+    heroImage.alt = `Shower tile installation detail for Bathroom Remodeling in ${location.name}, MD`;
+  }
+  if (entry.serviceSlug === "power-washing") {
+    heroImage.src = "/images/projects/siding.jpg";
+    heroImage.alt = `Olive siding and cream trim, example surfaces for ${service.navLabel} in ${location.name}, MD`;
+  }
+  if (entry.serviceSlug === "basement-remodeling") {
+    heroImage.src = "/images/services/basement-remodeling.jpg";
+    heroImage.alt = `Finished lower-level design inspiration for Basement Remodeling in ${location.name}, MD`;
+  }
+  if (entry.serviceSlug === "kitchen-remodeling") {
+    heroImage.src = "/images/services/kitchen-remodeling.jpg";
+    heroImage.alt = `Illustrative Kitchen Remodeling design for ${location.name}, MD, with shaker cabinets and an island`;
+  }
   return {
     ...metadata(`${entry.title} | KrasPro LLC`, entry.metaDescription ?? entry.introduction),
     title: entry.title,
@@ -159,14 +178,19 @@ export function geoServiceDefaults(entry: ServiceLocation, location: ServiceLoca
     focusTitle: entry.focusTitle,
     paragraphs: entry.paragraphs,
     checklist: entry.checklist,
-    heroImage: image(service.heroImage),
-    gallery: gallery(service.slug),
+    heroImage,
+    gallery: isBathroom ? photos.map(photo => ({ ...photo, alt: `${photo.alt}. Bathroom Remodeling reference for ${location.name}, MD.` })) : photos,
     faqTitle: `${service.navLabel} questions in ${location.name}`,
-    faqs: [...entry.faqs, {
+    faqs: entry.guide ? entry.faqs : [...entry.faqs, {
       question: `How do I ask about ${service.navLabel.toLowerCase()} in ${location.name}?`,
       answer: "Use the form below with your ZIP code and project details. Your town and service are already selected. Photos are optional and help explain the existing conditions.",
     }],
-    cta: cta(`Plan your ${service.navLabel.toLowerCase()} project`, `Tell us what you want to change at your ${location.name} property. Start with your ZIP code and the existing conditions.`),
+    cta: entry.cta ?? cta(`Plan your ${service.navLabel.toLowerCase()} project`, `Tell us what you want to change at your ${location.name} property. Start with your ZIP code and the existing conditions.`),
+    ...(entry.guide && {
+      pricingNote: entry.guide.pricingNote,
+      examples: entry.guide.examples,
+      sampleReviews: entry.guide.sampleReviews,
+    }),
   };
 }
 
