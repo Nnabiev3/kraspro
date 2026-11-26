@@ -64,6 +64,7 @@ for (const town of towns) {
     assert.match(pages.get(path), new RegExp(`<option[^>]*selected=""[^>]*value="${service}"|<option[^>]*value="${service}"[^>]*selected=""`), `Selected service: ${path}`);
   }
 }
+<<<<<<< HEAD
 for (const [service, localRoutes] of [["deck-building", deckRoutes], [paintingService, paintingRoutes], [renewalService, renewalRoutes], [restorationService, restorationRoutes]]) {
   const descriptions = new Set();
   for (const path of localRoutes) {
@@ -88,6 +89,25 @@ assert.equal((await fetch(new URL("/deck-building-unknown-town-md", base))).stat
 assert.equal((await fetch(new URL(`/${paintingService}-unknown-town-md`, base))).status, 404);
 assert.equal((await fetch(new URL(`/${renewalService}-unknown-town-md`, base))).status, 404);
 assert.equal((await fetch(new URL(`/${restorationService}-unknown-town-md`, base))).status, 404);
+=======
+const deckDescriptions = new Set();
+for (const path of deckRoutes) {
+  const html = pages.get(path);
+  for (const overview of ["/services/deck-building", "/service-areas"]) {
+    assert(pages.get(overview).includes(`href="${path}"`), `${overview} links to ${path}`);
+  }
+  assert.match(html, /<option[^>]*selected=""[^>]*value="deck-building"|<option[^>]*value="deck-building"[^>]*selected=""/, `Selected deck service: ${path}`);
+  const description = html.match(/<meta name="description" content="([^"]+)"/)?.[1];
+  assert(description, `Meta description: ${path}`);
+  assert(!deckDescriptions.has(description), `Unique description: ${path}`);
+  deckDescriptions.add(description);
+}
+const sitemap = await load("/sitemap.xml");
+for (const path of routes) {
+  assert.equal(sitemap.includes(path + "</loc>"), deckRoutes.has(path), `Sitemap publication status: ${path}`);
+}
+assert.equal((await fetch(new URL("/deck-building-unknown-town-md", base))).status, 404);
+>>>>>>> ea0c6f447188964907d20279922c4249165ede92
 const invalid = new FormData();
 invalid.set("city", "Reisterstown");
 assert.equal((await fetch(new URL("/api/quote", base), { method: "POST", body: invalid })).status, 400);
