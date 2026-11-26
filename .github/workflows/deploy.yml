@@ -41,6 +41,29 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
+      - name: Bind CMS database and apply migrations
+        if: ${{ vars.KRASPRO_CONTENT_DATABASE_ID != '' }}
+        env:
+          KRASPRO_CONTENT_DATABASE_ID: ${{ vars.KRASPRO_CONTENT_DATABASE_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          node --input-type=module <<'JS'
+          import { readFileSync, writeFileSync } from "node:fs";
+          const databaseId = process.env.KRASPRO_CONTENT_DATABASE_ID;
+          if (!/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(databaseId)) {
+            throw new Error("KRASPRO_CONTENT_DATABASE_ID must be a D1 database UUID");
+          }
+          const path = "wrangler.jsonc";
+          const config = JSON.parse(readFileSync(path, "utf8"));
+          config.d1_databases = [
+            ...(config.d1_databases ?? []).filter(database => database.binding !== "KRASPRO_CONTENT"),
+            { binding: "KRASPRO_CONTENT", database_name: "kraspro-content", database_id: databaseId },
+          ];
+          writeFileSync(path, JSON.stringify(config, null, 2) + "\n");
+          JS
+          npx wrangler d1 migrations apply KRASPRO_CONTENT --remote
+
       - name: Build Worker with OpenNext
         env:
           NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || steps.worker.outputs.url }}

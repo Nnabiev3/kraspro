@@ -17,10 +17,9 @@ export function faqSchema(faqs: readonly Faq[]) {
   };
 }
 
-export function localBusinessSchema() {
+export function localBusinessSchema(site: typeof import("@/data/site").site, logoPath = "/images/brand/logo-full-transparent.svg") {
   const [locality, , region] = site.location.split(",").map(part => part.trim());
   const url = absoluteUrl("/");
-  const logoPath = "/images/brand/logo-full-transparent.svg";
   const sameAs = site.sameAs.filter(isConfirmed);
 
   return {
@@ -29,7 +28,7 @@ export function localBusinessSchema() {
     "@id": url ? `${url}#business` : undefined,
     name: site.name,
     url,
-    logo: absoluteUrl(logoPath) ?? logoPath,
+    logo: logoPath.startsWith("/") ? absoluteUrl(logoPath) ?? logoPath : logoPath,
     telephone: isConfirmed(site.phone) ? site.phone : undefined,
     email: isConfirmed(site.email) ? site.email : undefined,
     address: {

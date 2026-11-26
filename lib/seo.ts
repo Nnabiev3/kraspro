@@ -20,7 +20,7 @@ export function absoluteUrl(path: string): string | undefined {
   return base && new URL(path, base).href;
 }
 
-export function pageMetadata(title: string, description: string, pathname: string): Metadata {
+export function pageMetadata(title: string, description: string, pathname: string, siteName = site.name): Metadata {
   const canonical = absoluteUrl(pathname);
   const image = absoluteUrl("/images/og/kraspro.png");
   return {
@@ -29,11 +29,11 @@ export function pageMetadata(title: string, description: string, pathname: strin
     alternates: canonical ? { canonical } : undefined,
     openGraph: {
       type: "website",
-      siteName: site.name,
+      siteName,
       title,
       description,
       url: canonical,
-      images: image ? [{ url: image, width: 1200, height: 630, alt: site.name }] : undefined,
+      images: image ? [{ url: image, width: 1200, height: 630, alt: siteName }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
