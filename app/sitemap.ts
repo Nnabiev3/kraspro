@@ -49,6 +49,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "basement-remodeling": "data/basement-remodeling-locations.ts",
     "kitchen-remodeling": "data/kitchen-remodeling-locations.ts",
     "bathroom-remodeling": "data/bathroom-remodeling-locations.ts",
+    "christmas-light-installation": "data/christmas-light-installation-locations.ts",
   };
   const geoPages = getGeoRoutes().filter(route => route.status === "published").map(route => {
     const source = route.kind === "service" ? serviceLocationSources[route.service.slug] : undefined;

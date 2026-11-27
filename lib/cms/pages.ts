@@ -171,8 +171,11 @@ export function geoServiceDefaults(entry: ServiceLocation, location: ServiceLoca
     heroImage.src = "/images/services/kitchen-remodeling.jpg";
     heroImage.alt = `Illustrative Kitchen Remodeling design for ${location.name}, MD, with shaker cabinets and an island`;
   }
+  if (entry.serviceSlug === "christmas-light-installation") {
+    heroImage.alt = `Warm white roofline and porch lights, a Christmas Light Installation example for ${location.name}, MD`;
+  }
   return {
-    ...metadata(`${entry.title} | KrasPro LLC`, entry.metaDescription ?? entry.introduction),
+    ...metadata(entry.metaTitle ?? `${entry.title} | KrasPro LLC`, entry.metaDescription ?? entry.introduction),
     title: entry.title,
     introduction: entry.introduction,
     focusTitle: entry.focusTitle,

@@ -299,6 +299,9 @@ export const services: Service[] = [
       { question: "Can we discuss taking the lights down?", answer: "Yes. Ask about removal when we discuss the scope and schedule." },
     ],
     related: [],
-    heroImage: pendingPhoto,
+    heroImage: {
+      src: "/images/services/christmas-light-installation.jpg",
+      alt: "Illustrative Christmas Light Installation design for a Maryland home with warm white roofline and porch lights",
+    },
   },
 ];

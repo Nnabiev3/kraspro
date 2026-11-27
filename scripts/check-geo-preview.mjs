@@ -22,7 +22,7 @@ const paintingService = "exterior-painting-carpentry";
 const renewalService = "window-door-renewal";
 const restorationService = "historic-window-restoration";
 const houseRestorationService = "house-restoration";
-const services = ["deck-building", paintingService, renewalService, restorationService, houseRestorationService, "power-washing", "basement-remodeling", "kitchen-remodeling", "bathroom-remodeling"];
+const services = ["deck-building", paintingService, renewalService, restorationService, houseRestorationService, "power-washing", "basement-remodeling", "kitchen-remodeling", "bathroom-remodeling", "christmas-light-installation"];
 const existingRoutes = towns.flatMap(town => [
   `/home-remodeling-${town}-md`,
   ...services.map(service => `/${service}-${town}-md`),
@@ -107,6 +107,11 @@ const projectGuides = [
     imagePath: "/images/projects/kraspro/shower-tiling.jpg",
     heroAlt: city => `Shower tile installation detail for Bathroom Remodeling in ${city}, MD`,
   },
+  {
+    slug: "christmas-light-installation",
+    label: "Christmas Light Installation",
+    heroAlt: city => `Warm white roofline and porch lights, a Christmas Light Installation example for ${city}, MD`,
+  },
 ];
 
 for (const { slug, label, heroAlt, imagePath = `/images/services/${slug}.jpg` } of projectGuides) {
@@ -146,8 +151,10 @@ for (const { slug, label, heroAlt, imagePath = `/images/services/${slug}.jpg` } 
     assert(business && service?.provider?.["@id"] === business["@id"], `Shared LocalBusiness provider: ${path}`);
     assert.equal(service.url, canonical, path);
     assert.equal(service.areaServed.name, city + ", Maryland", path);
-    if (slug === "bathroom-remodeling") {
+    if (["bathroom-remodeling", "christmas-light-installation"].includes(slug)) {
       assert.equal(service.areaServed["@type"], "City", path);
+    }
+    if (slug === "bathroom-remodeling") {
       assert(html.includes(`Bathroom Remodeling reference for ${city}, MD."`), `Localized gallery alt: ${path}`);
     }
     assert(schema.some(item => item["@type"] === "BreadcrumbList" && item.itemListElement.at(-1).item === canonical), `Breadcrumbs: ${path}`);

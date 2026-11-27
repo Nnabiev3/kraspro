@@ -81,10 +81,30 @@ const bathroomGuide = {
   reviewDisclosure: "These fictional examples show what homeowners might value during a remodel.",
 };
 
+const christmasLightGuide = {
+  service: "Christmas Light Installation",
+  costId: "christmas-light-installation-cost",
+  priceRanges: [
+    { label: "Standard lighting by measured run", range: "$2.70–$7.40 per linear foot" },
+    { label: "Roof lighting", range: "$160–$1,270" },
+    { label: "Tree lighting", range: "$80–$1,590 per tree" },
+  ],
+  priceDisclosure: "Baltimore-area market ranges in USD from Angi. These are planning figures. Confirm which lights, mounting, seasonal service calls, removal and storage are included before comparing written quotes.",
+  processTitle: "How Seasonal Light Installation Works",
+  steps: [
+    { title: "Share the view and the dates", description: "Send a wide photo of the frontage and a closer view of the features you want lit. Include the occasions when you want the display ready, the outdoor power you know about and anything that limits access to the work area." },
+    { title: "Review the layout and written estimate", description: "We discuss the primary sightline, color, mounting surfaces and what must stay accessible. The quote defines which elevations and accents are included. Ask for options for lights, timers, removal and storage so you can see which items affect the total." },
+    { title: "Schedule installation and check the display", description: "Agree on a work window and a contact for access. A wet or icy surface can mean choosing another date. Review the installed layout and timer settings, and confirm who to contact if a section goes out or the removal schedule needs to change." },
+  ],
+  exampleDisclosure: "Illustrative project scenarios for planning a seasonal display.",
+  reviewDisclosure: "Fictional examples of what a homeowner might say about the planning process.",
+};
+
 const projectGuides: Partial<Record<string, typeof bathroomGuide>> = {
   "basement-remodeling": basementGuide,
   "kitchen-remodeling": kitchenGuide,
   "bathroom-remodeling": bathroomGuide,
+  "christmas-light-installation": christmasLightGuide,
 };
 
 export default async function LocationServicePageLayout({ entry, location, service, content }: { entry: ServiceLocation; location: ServiceLocationArea; service: Service; content: ReturnType<typeof geoServiceDefaults> }) {
@@ -94,11 +114,13 @@ export default async function LocationServicePageLayout({ entry, location, servi
   const related = getActiveServiceLocations().filter(item => item.locationSlug === location.slug && item.serviceSlug !== service.slug);
   const hub = location.hub;
   const isBathroom = service.slug === "bathroom-remodeling";
+  const isChristmasLighting = service.slug === "christmas-light-installation";
   const projectGuide = projectGuides[service.slug];
   const imageCaption = {
     "/images/services/basement-remodeling.jpg": "Illustrative basement design",
     "/images/services/kitchen-remodeling.jpg": "Illustrative kitchen design",
     "/images/projects/kraspro/shower-tiling.jpg": "KrasPro shower installation detail",
+    "/images/services/christmas-light-installation.jpg": "Illustrative seasonal lighting design",
   }[content.heroImage.src];
   const guideProps = entry.guide && {
     city: location.name,
@@ -108,13 +130,13 @@ export default async function LocationServicePageLayout({ entry, location, servi
   };
   return <>
     <Breadcrumbs parents={[{ label: service.navLabel, href: `/services/${service.slug}` }]} current={{ label: location.name, href: path }} />
-    <JsonLd data={{ ...serviceSchema(service), name: content.title, description: content.introduction, url: absoluteUrl(path), areaServed: { "@type": isBathroom ? "City" : "Place", name: `${location.name}, Maryland` } }} />
+    <JsonLd data={{ ...serviceSchema(service), name: content.title, description: content.introduction, url: absoluteUrl(path), areaServed: { "@type": isBathroom || isChristmasLighting ? "City" : "Place", name: `${location.name}, Maryland` } }} />
     <FaqJsonLd faqs={content.faqs} />
     <Hero eyebrow={`${location.name}, ${hub?.county ?? "Maryland"}`} title={content.title} description={content.introduction} image={{ ...content.heroImage, isPlaceholder: content.heroImage.src === service.heroImage.src && service.heroImage.isPlaceholder }} imageCaption={imageCaption} workHref={photos.length ? "#project-photos" : undefined} quoteHref="#request-quote" />
     <nav aria-label="Explore this service and area" className="border-b border-gray-200 bg-white py-5"><Container className="flex flex-wrap gap-x-8 gap-y-3 text-sm font-semibold text-teal"><Link href={`/services/${service.slug}`} className="underline underline-offset-4">{service.navLabel} across Maryland</Link>{hub && <Link href={locationPath(hub)} className="underline underline-offset-4">All services in {location.name}</Link>}<Link href="/service-areas" className="underline underline-offset-4">All service areas</Link></Container></nav>
     <section className="bg-white py-14 md:py-24"><Container className="grid items-start gap-10 lg:grid-cols-[1.15fr_0.85fr]">
       <div>
-        {isBathroom && <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-teal">Why Work With KrasPro</p>}
+        {(isBathroom || isChristmasLighting) && <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-teal">Why Work With KrasPro</p>}
         <SectionHeading title={content.focusTitle} />
         <div className="max-w-2xl space-y-5 text-lg leading-relaxed text-gray-600">{content.paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div>
       </div>

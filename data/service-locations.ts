@@ -8,6 +8,7 @@ import { powerWashingCities } from "./power-washing-locations";
 import { basementCities } from "./basement-remodeling-locations";
 import { kitchenCities } from "./kitchen-remodeling-locations";
 import { bathroomCities } from "./bathroom-remodeling-locations";
+import { christmasLightLocations, christmasLightService } from "./christmas-light-installation-locations";
 import { serviceAreaId, site } from "./site";
 import { services, type Faq } from "./services";
 
@@ -16,6 +17,7 @@ export type ServiceLocation = {
   locationSlug: string;
   status: PublicationStatus;
   title: string;
+  metaTitle?: string;
   metaDescription?: string;
   introduction: string;
   focusTitle: string;
@@ -39,7 +41,7 @@ const powerWashingService = "power-washing";
 const basementService = "basement-remodeling";
 const kitchenService = "kitchen-remodeling";
 const bathroomService = "bathroom-remodeling";
-const standaloneCityServices = new Set(["deck-building", paintingService, renewalService, restorationService, houseRestorationService, powerWashingService, basementService, kitchenService, bathroomService]);
+const standaloneCityServices = new Set(["deck-building", paintingService, renewalService, restorationService, houseRestorationService, powerWashingService, basementService, kitchenService, bathroomService, christmasLightService]);
 
 const deckBuildingLocations: ServiceLocation[] = deckCities.map(({ slug, name, ...copy }) => ({
   ...copy,
@@ -142,6 +144,7 @@ export const serviceLocations: ServiceLocation[] = [
     status: "published",
     title: `Bathroom Remodeling in ${name}, MD`,
   })),
+  ...christmasLightLocations,
 ];
 
 export const serviceLocationPath = (entry: Pick<ServiceLocation, "serviceSlug" | "locationSlug">) => `/${entry.serviceSlug}-${entry.locationSlug}-md`;
