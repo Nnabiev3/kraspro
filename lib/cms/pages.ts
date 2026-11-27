@@ -1,5 +1,6 @@
 import { homeFaqs, homeFeaturedServices, homeHero, homeProcess, valueProps } from "@/data/home";
 import { locationPath, type Location } from "@/data/locations";
+import { cityHubs, findCityHub } from "@/data/geo";
 import { deckCover, projects, servicePhotos, type Photo } from "@/data/projects";
 import { reviews } from "@/data/reviews";
 import { getGeoRoutes, type ServiceLocation, type ServiceLocationArea } from "@/data/service-locations";
@@ -213,9 +214,18 @@ export const servicePages = services.map(service => ({
 }));
 
 const geo = getGeoRoutes();
-export const cityPages = geo.flatMap(route => route.kind === "location"
-  ? [{ path: locationPath(route.location), title: route.location.name, defaults: cityDefaults(route.location) }]
-  : []);
+
+export function cityHubCta(name: string) {
+  return { cta: cta(`Tell us about your ${name} home`, "Share the changes you want to make and what prompted the project.") };
+}
+
+export const cityPages = [
+  ...geo.flatMap(route => route.kind === "location"
+    ? [{ path: route.path, title: route.location.name, defaults: cityDefaults(route.location) }]
+    : []),
+  ...cityHubs.filter(city => !geo.some(route => route.kind === "location" && findCityHub(route.path) === city))
+    .map(city => ({ path: locationPath(city), title: city.name, defaults: cityHubCta(city.name) })),
+];
 export const geoServicePages = geo.flatMap(route => {
   if (route.kind !== "service") return [];
   const { path, entry, location, service } = route;

@@ -3,6 +3,7 @@
 // ==========================================
 
 import { locations, locationPath } from "./locations";
+import { cityHubs, isHubIndexable } from "./geo";
 
 export type NavItem = {
   label: string;
@@ -169,6 +170,8 @@ export function getServiceAreaLinks(): ServiceAreaLink[] {
     .map((name) => ({
       name,
       href: (() => {
+        const city = cityHubs.find(item => item.name === name);
+        if (city) return isHubIndexable(city) ? locationPath(city) : `/service-areas#${city.slug}`;
         const location = locations.find(item => item.name === name && item.status !== "draft");
         return location ? locationPath(location) : `/service-areas#${serviceAreaId(name)}`;
       })(),

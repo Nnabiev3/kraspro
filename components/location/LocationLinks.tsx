@@ -3,6 +3,7 @@ import { ArrowUpRight, MapPin } from "lucide-react";
 import Container from "@/components/ui/Container";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { locationPath } from "@/data/locations";
+import { findCityHub, isHubIndexable } from "@/data/geo";
 import { getActiveLocations, getActiveServiceLocations, serviceLocationPath } from "@/data/service-locations";
 import { getServiceAreaLinks } from "@/data/site";
 
@@ -13,6 +14,8 @@ export default function LocationLinks({ serviceSlug, excludeLocation, nearby }: 
     const entry = serviceAreas.get(area.name);
     const hub = entry?.location.hub ?? locations.find(location => location.name === area.name);
     const slug = entry?.locationSlug ?? hub?.slug;
+    const researched = hub && findCityHub(locationPath(hub));
+    if (!entry && excludeLocation && researched && !isHubIndexable(researched)) return [];
     if (excludeLocation && (slug === excludeLocation || (serviceSlug ? !entry : !hub))) return [];
     if (nearby && (!slug || !nearby.includes(slug))) return [];
     return [{

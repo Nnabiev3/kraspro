@@ -1,5 +1,5 @@
 "use client";
-import { useState, type FormEvent } from "react";
+import { useId, useState, type FormEvent } from "react";
 import { quoteSchema } from "@/lib/validators";
 import { services } from "@/data/services";
 
@@ -8,6 +8,8 @@ const fieldClass = "mt-1 w-full rounded-lg border border-gray-600 bg-white px-3 
 
 /** Collects and validates a homeowner's quote request. */
 export default function QuoteForm({ defaultService = "", defaultCity = "", sourcePage = "" }: Props) {
+  const formId = useId();
+  const fieldId = (field: string) => `${formId}-${field}`;
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState("");
   const [pending, setPending] = useState(false);
@@ -48,17 +50,17 @@ export default function QuoteForm({ defaultService = "", defaultCity = "", sourc
     }
   }
 
-  function error(name: string) { return errors[name] ? <p id={`${name}-error`} className="mt-1 text-sm font-semibold text-navy">{errors[name]}</p> : null; }
-  function attributes(name: string) { return { "aria-invalid": Boolean(errors[name]), "aria-describedby": errors[name] ? `${name}-error` : undefined }; }
+  function error(name: string) { return errors[name] ? <p id={fieldId(`${name}-error`)} className="mt-1 text-sm font-semibold text-navy">{errors[name]}</p> : null; }
+  function attributes(name: string) { return { "aria-invalid": Boolean(errors[name]), "aria-describedby": errors[name] ? fieldId(`${name}-error`) : undefined }; }
   return <form onSubmit={submit} noValidate className="space-y-4">
     <input type="hidden" name="sourcePage" value={sourcePage} />
-    {defaultCity && <div><label htmlFor="quote-city">Project town</label><input className={fieldClass} id="quote-city" name="city" defaultValue={defaultCity} autoComplete="address-level2" maxLength={100} {...attributes("city")} />{error("city")}</div>}
-    <div><label htmlFor="quote-name">Name</label><input className={fieldClass} id="quote-name" name="name" autoComplete="name" required maxLength={100} {...attributes("name")} />{error("name")}</div>
+    {defaultCity && <div><label htmlFor={fieldId("quote-city")}>Project town</label><input className={fieldClass} id={fieldId("quote-city")} name="city" defaultValue={defaultCity} autoComplete="address-level2" maxLength={100} {...attributes("city")} />{error("city")}</div>}
+    <div><label htmlFor={fieldId("quote-name")}>Name</label><input className={fieldClass} id={fieldId("quote-name")} name="name" autoComplete="name" required maxLength={100} {...attributes("name")} />{error("name")}</div>
     <div>
-      <label htmlFor="quote-preference">How should we contact you?</label>
+      <label htmlFor={fieldId("quote-preference")}>How should we contact you?</label>
       <select
         className={fieldClass}
-        id="quote-preference"
+        id={fieldId("quote-preference")}
         name="preferredContact"
         value={preferredContact}
         onChange={event => {
@@ -73,15 +75,15 @@ export default function QuoteForm({ defaultService = "", defaultCity = "", sourc
       {error("preferredContact")}
     </div>
     {preferredContact === "phone" ? (
-      <div key="phone"><label htmlFor="quote-phone">Phone</label><input className={fieldClass} id="quote-phone" name="phone" type="tel" autoComplete="tel" required maxLength={30} {...attributes("phone")} />{error("phone")}</div>
+      <div key="phone"><label htmlFor={fieldId("quote-phone")}>Phone</label><input className={fieldClass} id={fieldId("quote-phone")} name="phone" type="tel" autoComplete="tel" required maxLength={30} {...attributes("phone")} />{error("phone")}</div>
     ) : (
-      <div key="email"><label htmlFor="quote-email">Email</label><input className={fieldClass} id="quote-email" name="email" type="email" autoComplete="email" required maxLength={254} {...attributes("email")} />{error("email")}</div>
+      <div key="email"><label htmlFor={fieldId("quote-email")}>Email</label><input className={fieldClass} id={fieldId("quote-email")} name="email" type="email" autoComplete="email" required maxLength={254} {...attributes("email")} />{error("email")}</div>
     )}
-    <div><label htmlFor="quote-zip">ZIP code</label><input className={fieldClass} id="quote-zip" name="zip" autoComplete="postal-code" required {...attributes("zip")} />{error("zip")}</div>
-    <div><label htmlFor="quote-service">Service</label><select className={fieldClass} id="quote-service" name="service" defaultValue={defaultService} required {...attributes("service")}><option value="">Select a service</option>{services.map(service => <option key={service.slug} value={service.slug}>{service.navLabel}</option>)}</select>{error("service")}</div>
-    <div><label htmlFor="quote-description">Project description (optional)</label><textarea className={fieldClass} id="quote-description" name="description" rows={4} maxLength={5000} {...attributes("description")} />{error("description")}</div>
-    <div><label htmlFor="quote-photo">Photo (optional, JPEG, PNG or WebP, up to 1 MB)</label><input className={fieldClass} id="quote-photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" {...attributes("photo")} />{error("photo")}</div>
-    <div className="absolute -left-[10000px]" aria-hidden="true"><label htmlFor="company_website">Company website</label><input id="company_website" name="company_website" tabIndex={-1} autoComplete="off" /></div>
+    <div><label htmlFor={fieldId("quote-zip")}>ZIP code</label><input className={fieldClass} id={fieldId("quote-zip")} name="zip" autoComplete="postal-code" required {...attributes("zip")} />{error("zip")}</div>
+    <div><label htmlFor={fieldId("quote-service")}>Service</label><select className={fieldClass} id={fieldId("quote-service")} name="service" defaultValue={defaultService} required {...attributes("service")}><option value="">Select a service</option>{services.map(service => <option key={service.slug} value={service.slug}>{service.navLabel}</option>)}</select>{error("service")}</div>
+    <div><label htmlFor={fieldId("quote-description")}>Project description (optional)</label><textarea className={fieldClass} id={fieldId("quote-description")} name="description" rows={4} maxLength={5000} {...attributes("description")} />{error("description")}</div>
+    <div><label htmlFor={fieldId("quote-photo")}>Photo (optional, JPEG, PNG or WebP, up to 1 MB)</label><input className={fieldClass} id={fieldId("quote-photo")} name="photo" type="file" accept="image/jpeg,image/png,image/webp" {...attributes("photo")} />{error("photo")}</div>
+    <div className="absolute -left-[10000px]" aria-hidden="true"><label htmlFor={fieldId("company_website")}>Company website</label><input id={fieldId("company_website")} name="company_website" tabIndex={-1} autoComplete="off" /></div>
     <div><label className="flex items-start gap-2"><input className="mt-1" type="checkbox" name="consent" required {...attributes("consent")} />I agree to be contacted about my project.</label>{error("consent")}</div>
     <button disabled={pending} className="button-primary min-h-12 rounded-full px-6 py-3 font-semibold transition-colors disabled:opacity-60">{pending ? "Sending…" : "Request a Free Quote"}</button>
     {status && <p role="status" aria-live="polite">{status}</p>}

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { isConfirmed } from "@/data/site";
+import { publicCityHubHref } from "@/data/geo";
 import { readFooter, readSite } from "@/lib/cms/public";
 import Container from "@/components/ui/Container";
 
@@ -27,7 +28,7 @@ export default async function Footer() {
                 {isConfirmed(site.phone) && (
                   <a className={actionLink} href={`tel:${site.phone}`}>Call {site.phone}<ArrowRight aria-hidden="true" className="size-4" /></a>
                 )}
-                {footer.quote.label && <Link className={actionLink} href={footer.quote.href}>{footer.quote.label}<ArrowRight aria-hidden="true" className="size-4" /></Link>}
+                {footer.quote.label && <Link className={actionLink} href={publicCityHubHref(footer.quote.href)}>{footer.quote.label}<ArrowRight aria-hidden="true" className="size-4" /></Link>}
               </div>
               {isConfirmed(site.email) && <a className={`${footerLink} break-all text-white/80`} href={`mailto:${site.email}`}>{site.email}</a>}
               {isConfirmed(site.streetAddress) && <p className="text-sm text-white/80">{site.streetAddress}</p>}
@@ -41,16 +42,16 @@ export default async function Footer() {
             <h2 id="footer-services" className="font-heading text-xl font-semibold">{footer.servicesTitle}</h2>
             <ul className="mt-3 space-y-1 text-white/80">
               {footer.serviceLinks.map(({ href, label }, index) => (
-                <li key={index}><Link className={footerLink} href={href}>{label}</Link></li>
+                <li key={index}><Link className={footerLink} href={publicCityHubHref(href)}>{label}</Link></li>
               ))}
-              {footer.allServices.label && <li><Link className={actionLink} href={footer.allServices.href}>{footer.allServices.label}<ArrowRight aria-hidden="true" className="size-4 shrink-0" /></Link></li>}
+              {footer.allServices.label && <li><Link className={actionLink} href={publicCityHubHref(footer.allServices.href)}>{footer.allServices.label}<ArrowRight aria-hidden="true" className="size-4 shrink-0" /></Link></li>}
             </ul>
           </nav>
           <nav aria-labelledby="footer-company" className="min-w-0">
             <h2 id="footer-company" className="font-heading text-xl font-semibold">{footer.companyTitle}</h2>
             <ul className="mt-3 space-y-1 text-white/80">
               {footer.companyLinks.map(({ href, label }, index) => (
-                <li key={index}><Link className={footerLink} href={href}>{label}</Link></li>
+                <li key={index}><Link className={footerLink} href={publicCityHubHref(href)}>{label}</Link></li>
               ))}
             </ul>
           </nav>
@@ -61,7 +62,7 @@ export default async function Footer() {
             {isConfirmed(site.licenseNumber) && ` · MHIC #${site.licenseNumber}`}
             {isConfirmed(site.epaCertification) && ` · ${site.epaCertification}`}
           </p>
-          {footer.privacy.label && <Link className={footerLink} href={footer.privacy.href}>{footer.privacy.label}</Link>}
+          {footer.privacy.label && <Link className={footerLink} href={publicCityHubHref(footer.privacy.href)}>{footer.privacy.label}</Link>}
         </div>
       </Container>
     </footer>

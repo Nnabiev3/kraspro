@@ -13,6 +13,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import LocationLinks from "@/components/location/LocationLinks";
 import LocationWashingGuide from "@/components/service/LocationWashingGuide";
 import LocationProjectGuide from "@/components/service/LocationProjectGuide";
+import { publicCityHubHref } from "@/data/geo";
 import { locationPath } from "@/data/locations";
 import { getActiveServiceLocations, serviceLocationPath, type ServiceLocation, type ServiceLocationArea } from "@/data/service-locations";
 import type { Service } from "@/data/services";
@@ -133,7 +134,7 @@ export default async function LocationServicePageLayout({ entry, location, servi
     <JsonLd data={{ ...serviceSchema(service), name: content.title, description: content.introduction, url: absoluteUrl(path), areaServed: { "@type": isBathroom || isChristmasLighting ? "City" : "Place", name: `${location.name}, Maryland` } }} />
     <FaqJsonLd faqs={content.faqs} />
     <Hero eyebrow={`${location.name}, ${hub?.county ?? "Maryland"}`} title={content.title} description={content.introduction} image={{ ...content.heroImage, isPlaceholder: content.heroImage.src === service.heroImage.src && service.heroImage.isPlaceholder }} imageCaption={imageCaption} workHref={photos.length ? "#project-photos" : undefined} quoteHref="#request-quote" />
-    <nav aria-label="Explore this service and area" className="border-b border-gray-200 bg-white py-5"><Container className="flex flex-wrap gap-x-8 gap-y-3 text-sm font-semibold text-teal"><Link href={`/services/${service.slug}`} className="underline underline-offset-4">{service.navLabel} across Maryland</Link>{hub && <Link href={locationPath(hub)} className="underline underline-offset-4">All services in {location.name}</Link>}<Link href="/service-areas" className="underline underline-offset-4">All service areas</Link></Container></nav>
+    <nav aria-label="Explore this service and area" className="border-b border-gray-200 bg-white py-5"><Container className="flex flex-wrap gap-x-8 gap-y-3 text-sm font-semibold text-teal"><Link href={`/services/${service.slug}`} className="underline underline-offset-4">{service.navLabel} across Maryland</Link>{hub && <Link href={publicCityHubHref(locationPath(hub))} className="underline underline-offset-4">All services in {location.name}</Link>}<Link href="/service-areas" className="underline underline-offset-4">All service areas</Link></Container></nav>
     <section className="bg-white py-14 md:py-24"><Container className="grid items-start gap-10 lg:grid-cols-[1.15fr_0.85fr]">
       <div>
         {(isBathroom || isChristmasLighting) && <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-teal">Why Work With KrasPro</p>}

@@ -2,6 +2,7 @@ import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { locationPath } from "@/data/locations";
+import { cityHubs, isHubIndexable } from "@/data/geo";
 import { getActiveLocations, getActiveServiceLocations, serviceLocationPath } from "@/data/service-locations";
 import FaqJsonLd from "@/components/seo/FaqJsonLd";
 import CTABand from "@/components/sections/CTABand";
@@ -18,9 +19,10 @@ export const generateMetadata = () => editedMetadata("/service-areas", areasDefa
 export default async function ServiceAreasPage() {
   const [content, site, services] = await Promise.all([readPage("/service-areas", areasDefaults), readSite(), readServices()]);
   const license = site.trust.licensed ? ` Licensed in Maryland${isConfirmed(site.licenseNumber) ? ` (MHIC #${site.licenseNumber})` : ""}.` : "";
-  const locations = getActiveLocations();
+  const coveredHubs = cityHubs.filter(city => site.serviceAreas.includes(city.name));
+  const locations = getActiveLocations().filter(location => !coveredHubs.some(city => city.slug === location.slug));
   const entries = getActiveServiceLocations();
-  const counties = [...new Set(locations.map(location => location.county))];
+  const counties = [...new Set([...locations.map(location => location.county), ...coveredHubs.map(city => city.county.text)])];
   return (
     <>
       <Breadcrumbs current={{ label: "Service Areas", href: "/service-areas" }} />
@@ -48,14 +50,21 @@ export default async function ServiceAreasPage() {
             <Link href={locationPath(location)} className="flex items-center justify-between gap-3 text-2xl font-semibold text-navy hover:text-teal">{location.name}<ArrowUpRight className="size-5 shrink-0" aria-hidden="true" /></Link>
             <p className="mb-5 mt-2 text-sm text-gray-600">Home remodeling in {location.name}, MD</p>
             <ul className="space-y-3 border-t border-gray-200 pt-5">{entries.filter(entry => entry.locationSlug === location.slug).map(entry => <li key={entry.serviceSlug}><Link href={serviceLocationPath(entry)} className="font-semibold text-teal underline underline-offset-4">{services.find(service => service.slug === entry.serviceSlug)!.navLabel}</Link></li>)}</ul>
-          </li>)}</ul>
+          </li>)}{coveredHubs.filter(city => city.county.text === county).map(city => (
+            <li id={city.slug} key={city.slug} className="scroll-mt-24 rounded-2xl border border-gray-200 bg-surface p-6">
+              {isHubIndexable(city)
+                ? <Link href={locationPath(city)} className="text-2xl font-semibold text-navy underline-offset-4 hover:text-teal hover:underline">{city.name}</Link>
+                : <span className="text-2xl font-semibold text-navy">{city.name}</span>}
+              <p className="mt-2 text-sm text-gray-600">{isHubIndexable(city) ? "Home remodeling in Maryland" : "Ask about your address"}</p>
+            </li>
+          ))}</ul>
         </div>)}
       </Container></section>
       <section className="bg-white py-14 md:py-24">
         <Container>
           <SectionHeading title={content.communitiesTitle} />
           <ul aria-label="Maryland communities" className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-            {site.serviceAreas.filter(area => !locations.some(location => location.name === area)).map(area => {
+            {site.serviceAreas.filter(area => !locations.some(location => location.name === area) && !coveredHubs.some(city => city.name === area)).map(area => {
               const localServices = entries.filter(entry => entry.location.name === area);
               return (
                 <li key={area} id={serviceAreaId(area)} className="scroll-mt-24 rounded-xl border border-gray-200 bg-surface px-4 py-3 font-semibold text-navy target:border-teal target:bg-teal target:text-white">

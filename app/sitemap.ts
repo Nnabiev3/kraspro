@@ -2,6 +2,8 @@ import { statSync } from "node:fs";
 import { join } from "node:path";
 import type { MetadataRoute } from "next";
 import { services } from "@/data/services";
+import { cityHubs, isHubIndexable } from "@/data/geo";
+import { locationPath } from "@/data/locations";
 import { getGeoRoutes } from "@/data/service-locations";
 import { siteBaseUrl } from "@/lib/seo";
 
@@ -51,12 +53,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "bathroom-remodeling": "data/bathroom-remodeling-locations.ts",
     "christmas-light-installation": "data/christmas-light-installation-locations.ts",
   };
-  const geoPages = getGeoRoutes().filter(route => route.status === "published").map(route => {
+  const geoPages = getGeoRoutes().filter(route => route.status === "published" && !cityHubs.some(city => locationPath(city) === route.path)).map(route => {
     const source = route.kind === "service" ? serviceLocationSources[route.service.slug] : undefined;
     return [route.path, source ? [...geoSources, source] : geoSources] as const;
   });
 
-  return [...Object.entries(pageSources), ...servicePages, ...geoPages].map(([pathname, sources]) => ({
+  const hubPages = cityHubs.filter(isHubIndexable).map(city => [
+    locationPath(city),
+    ["components/location/CityHubLayout.tsx", "data/geo.ts", `data/cities/${city.slug}.ts`],
+  ] as const);
+
+  return [...Object.entries(pageSources), ...servicePages, ...geoPages, ...hubPages].map(([pathname, sources]) => ({
     url: new URL(pathname, base).href,
     lastModified: lastEdited(sources),
   }));
